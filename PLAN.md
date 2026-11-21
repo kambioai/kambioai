@@ -54,6 +54,7 @@ Nenhuma branch vai para a `main` sem passar por estes três crivos. Rode e regis
 
 ## Fase 0 — Setup do projeto
 - **Branch**: `fase-00-setup`
+- **Status**: ✅ Concluída (21/11/2026) — publicada em produção na Vercel; branch mesclada na `main` e removida.
 - **Objetivo**: projeto Next.js rodando na Vercel, com a identidade visual aplicada, exibindo uma tela inicial de teste.
 - **Fonte dos dados**: nenhuma.
 - **Itens**:
@@ -282,7 +283,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 
 | Fase | Branch | Entrega | Dados |
 | --- | --- | --- | --- |
-| 0 | `fase-00-setup` | Projeto + identidade visual + PWA na Vercel | — |
+| 0 ✅ | `fase-00-setup` | Projeto + identidade visual + PWA na Vercel | — |
 | 1 | `fase-01-design-system` | Componentes + navegação por perfil | fictício |
 | 2 | `fase-02-front-patrao` | Telas do patrão | fictício |
 | 3 | `fase-03-front-funcionario` | Telas do funcionário (sem dinheiro) | fictício |
