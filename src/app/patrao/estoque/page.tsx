@@ -1,14 +1,15 @@
-import { Package } from "lucide-react";
+import { EstoqueCatalogo } from "@/components/estoque-catalogo";
+import { listarCatalogo } from "@/lib/dados";
 
-import { TelaPlaceholder } from "@/components/tela-placeholder";
+export default async function Estoque() {
+  const itens = await listarCatalogo();
 
-export default function EstoquePatrao() {
   return (
-    <TelaPlaceholder
-      titulo="Estoque e catálogo"
-      descricao="Produtos e serviços com custo, preço e lucro, quantidade e alerta de estoque baixo."
-      fasePrevista="a Fase 2"
-      icone={Package}
-    />
+    <section className="space-y-5">
+      <h1 className="font-grotesk text-titulo font-bold text-principal">
+        Estoque e catálogo
+      </h1>
+      <EstoqueCatalogo itens={itens} />
+    </section>
   );
 }
