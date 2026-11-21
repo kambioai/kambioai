@@ -134,6 +134,7 @@ Nenhuma branch vai para a `main` sem passar por estes três crivos. Rode e regis
   - Dá para percorrer o onboarding do início ao "abrir o botão Falar", com barra de progresso avançando (tudo fictício).
 
 ## Fase 5 — Painel admin (fictício)
+- **Status**: ✅ Concluída (21/11/2026) — mesclada na `main` e removida. Vistoria verde (typecheck/lint/testes/build). Fecha o Bloco 1 (Marco 1).
 - **Branch**: `fase-05-front-admin`
 - **Objetivo**: painel admin navegável no computador, com dados fictícios.
 - **Fonte dos dados**: `fictício`.
@@ -292,7 +293,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 2 ✅ | `fase-02-front-patrao` | Telas do patrão | fictício |
 | 3 ✅ | `fase-03-front-funcionario` | Telas do funcionário (sem dinheiro) | fictício |
 | 4 ✅ | `fase-04-front-onboarding` | Onboarding + login/convite | fictício |
-| 5 | `fase-05-front-admin` | Painel admin | fictício |
+| 5 ✅ | `fase-05-front-admin` | Painel admin | fictício |
 | 6 | `fase-06-banco-rls` | Banco + RLS + views + login real | real |
 | 7 | `fase-07-onboarding-real` | Cadastro da empresa + catálogo real | real |
 | 8 | `fase-08-voz` | Pipeline de voz + OS transacional | real |
