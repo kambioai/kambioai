@@ -1,80 +1,92 @@
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { formatarReais } from "@/lib/utils";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Blocks,
+  Building2,
+  Car,
+  LayoutDashboard,
+  type LucideIcon,
+} from "lucide-react";
 
-const paleta = [
-  { nome: "Principal", valor: "#0F2A4A", classe: "bg-principal", claro: true },
-  { nome: "Destaque", valor: "#E8590C", classe: "bg-destaque", claro: true },
-  { nome: "Fundo", valor: "#F3F5F8", classe: "bg-fundo", claro: false },
-  { nome: "Superfície", valor: "#FFFFFF", classe: "bg-superficie", claro: false },
-  { nome: "Texto", valor: "#0E1726", classe: "bg-texto", claro: true },
+import { Logo } from "@/components/logo";
+
+interface Area {
+  nome: string;
+  descricao: string;
+  href: string;
+  icone: LucideIcon;
+}
+
+const areas: Area[] = [
   {
-    nome: "Texto 2",
-    valor: "#556070",
-    classe: "bg-texto-secundario",
-    claro: true,
+    nome: "Patrão",
+    descricao: "Painel, estoque, fechamento e equipe.",
+    href: "/patrao/painel",
+    icone: LayoutDashboard,
   },
-  { nome: "Linha", valor: "#E2E6EC", classe: "bg-linha", claro: false },
-  { nome: "Confirmado", valor: "#0B7A4B", classe: "bg-confirmado", claro: true },
-  { nome: "Atenção", valor: "#B54708", classe: "bg-atencao", claro: true },
-  { nome: "Erro", valor: "#B42318", classe: "bg-erro", claro: true },
+  {
+    nome: "Funcionário",
+    descricao: "Pátio e estoque, sem ver dinheiro.",
+    href: "/funcionario/patio",
+    icone: Car,
+  },
+  {
+    nome: "Admin",
+    descricao: "Visão geral do SaaS (pensado para o computador).",
+    href: "/admin/visao-geral",
+    icone: Building2,
+  },
 ];
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-8 px-4 py-10">
-      <header className="flex flex-col items-center gap-4 text-center">
-        <Logo tamanho={64} comNome />
-        <h1 className="font-grotesk text-titulo font-bold text-principal">
-          Fase 0 — fundação pronta
-        </h1>
+    <main className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col justify-center gap-8 px-4 py-10">
+      <header className="flex flex-col items-center gap-3 text-center">
+        <Logo tamanho={56} comNome />
         <p className="max-w-md text-corpo text-texto-secundario">
-          Projeto Next.js com a identidade visual aplicada. Daqui pra frente,
-          cada botão da navegação abre uma tela só.
+          Protótipo navegável (Fase 1). Escolha um perfil para entrar — dá para
+          trocar de perfil a qualquer momento pelo seletor no topo.
         </p>
       </header>
 
-      <section className="rounded-2xl border border-linha bg-superficie p-5">
-        <h2 className="mb-1 font-grotesk text-titulo font-bold text-principal">
-          Lucro de hoje
-        </h2>
-        <p className="font-grotesk text-painel font-bold text-principal">
-          {formatarReais(123456)}
-        </p>
-        <p className="text-legenda text-texto-secundario">
-          Número grande em Space Grotesk, formato R$ 1.234,56.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="mb-3 font-grotesk text-titulo font-bold text-principal">
-          Paleta
-        </h2>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {paleta.map((cor) => (
-            <li
-              key={cor.nome}
-              className="overflow-hidden rounded-xl border border-linha bg-superficie"
+      <nav className="space-y-3" aria-label="Áreas do app">
+        {areas.map((area) => {
+          const Icone = area.icone;
+          return (
+            <Link
+              key={area.href}
+              href={area.href}
+              className="flex items-center gap-4 rounded-2xl border border-linha bg-superficie p-4 outline-none transition-colors hover:border-principal focus-visible:ring-2 focus-visible:ring-principal"
             >
-              <div
-                className={`${cor.classe} h-16 w-full ${cor.claro ? "text-white" : "text-texto"}`}
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-principal text-white">
+                <Icone className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-grotesk text-corpo font-bold text-principal">
+                  {area.nome}
+                </span>
+                <span className="block text-legenda text-texto-secundario">
+                  {area.descricao}
+                </span>
+              </span>
+              <ArrowRight
+                className="h-5 w-5 shrink-0 text-texto-secundario"
+                aria-hidden="true"
               />
-              <div className="px-3 py-2">
-                <p className="text-corpo font-medium text-texto">{cor.nome}</p>
-                <p className="text-legenda text-texto-secundario">
-                  {cor.valor}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+            </Link>
+          );
+        })}
+      </nav>
 
-      <section className="flex flex-wrap gap-3">
-        <Button variant="principal">Botão principal</Button>
-        <Button variant="secundario">Botão secundário</Button>
-        <Button variant="destaque">Falar</Button>
-      </section>
+      <div className="text-center">
+        <Link
+          href="/componentes"
+          className="inline-flex items-center gap-2 text-corpo font-medium text-principal hover:underline"
+        >
+          <Blocks className="h-5 w-5" aria-hidden="true" />
+          Ver a vitrine de componentes
+        </Link>
+      </div>
     </main>
   );
 }

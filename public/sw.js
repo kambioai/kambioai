@@ -6,9 +6,7 @@ const CACHE = "kambio-casca-v1";
 const CASCA = ["/"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(CASCA)),
-  );
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(CASCA)));
   self.skipWaiting();
 });
 
@@ -31,7 +29,9 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   if (req.mode === "navigate") {
     event.respondWith(
-      fetch(req).catch(() => caches.match("/").then((r) => r ?? Response.error())),
+      fetch(req).catch(() =>
+        caches.match("/").then((r) => r ?? Response.error()),
+      ),
     );
   }
 });

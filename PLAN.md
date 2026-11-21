@@ -75,6 +75,7 @@ Nenhuma branch vai para a `main` sem passar por estes três crivos. Rode e regis
 
 ## Fase 1 — Design system e navegação
 - **Branch**: `fase-01-design-system`
+- **Status**: ✅ Concluída (21/11/2026) — mesclada na `main` e removida. Vistoria verde (typecheck/lint/testes/build).
 - **Objetivo**: componentes reaproveitáveis e navegação por perfil funcionando, navegável entre telas de placeholder.
 - **Fonte dos dados**: `fictício`.
 - **Itens**:
@@ -284,7 +285,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | Fase | Branch | Entrega | Dados |
 | --- | --- | --- | --- |
 | 0 ✅ | `fase-00-setup` | Projeto + identidade visual + PWA na Vercel | — |
-| 1 | `fase-01-design-system` | Componentes + navegação por perfil | fictício |
+| 1 ✅ | `fase-01-design-system` | Componentes + navegação por perfil | fictício |
 | 2 | `fase-02-front-patrao` | Telas do patrão | fictício |
 | 3 | `fase-03-front-funcionario` | Telas do funcionário (sem dinheiro) | fictício |
 | 4 | `fase-04-front-onboarding` | Onboarding + login/convite | fictício |

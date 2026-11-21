@@ -22,10 +22,7 @@ for (const alvo of alvos) {
   if (alvo.maskable) {
     const interno = Math.round(alvo.tamanho * 0.8);
     const margem = Math.round((alvo.tamanho - interno) / 2);
-    const miolo = await sharp(svg)
-      .resize(interno, interno)
-      .png()
-      .toBuffer();
+    const miolo = await sharp(svg).resize(interno, interno).png().toBuffer();
     await sharp({
       create: {
         width: alvo.tamanho,
