@@ -106,6 +106,7 @@ Nenhuma branch vai para a `main` sem passar por estes três crivos. Rode e regis
   - Cada tela tem estado vazio/carregando/erro e passa em 360px.
 
 ## Fase 3 — Telas do funcionário (fictício)
+- **Status**: ✅ Concluída (21/11/2026) — mesclada na `main` e removida. Vistoria verde (typecheck/lint/testes/build); auditoria sem custo/lucro nas telas do funcionário.
 - **Branch**: `fase-03-front-funcionario`
 - **Objetivo**: área do funcionário navegável, **sem custo/lucro em nenhuma tela**.
 - **Fonte dos dados**: `fictício`.
@@ -288,7 +289,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 0 ✅ | `fase-00-setup` | Projeto + identidade visual + PWA na Vercel | — |
 | 1 ✅ | `fase-01-design-system` | Componentes + navegação por perfil | fictício |
 | 2 ✅ | `fase-02-front-patrao` | Telas do patrão | fictício |
-| 3 | `fase-03-front-funcionario` | Telas do funcionário (sem dinheiro) | fictício |
+| 3 ✅ | `fase-03-front-funcionario` | Telas do funcionário (sem dinheiro) | fictício |
 | 4 | `fase-04-front-onboarding` | Onboarding + login/convite | fictício |
 | 5 | `fase-05-front-admin` | Painel admin | fictício |
 | 6 | `fase-06-banco-rls` | Banco + RLS + views + login real | real |
