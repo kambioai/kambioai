@@ -13,6 +13,7 @@ import {
   custosFixosMock,
   despesasMock,
   empresaMock,
+  funcionarioLogadoMock,
   funcionariosMock,
   ordensMock,
   taxasMock,
@@ -24,7 +25,7 @@ import {
   type TaxaMock,
   type VeiculoMock,
 } from "@/lib/mock";
-import type { FormaPagamento } from "@/types";
+import type { FormaPagamento, StatusOS, TipoItem } from "@/types";
 
 export type Periodo = "hoje" | "ontem" | "7dias" | "mes" | "tudo";
 
@@ -285,4 +286,109 @@ export async function listarOrdensDoVeiculo(
 ): Promise<OrdemMock[]> {
   const alvo = placa.trim().toUpperCase();
   return ordensMock.filter((o) => o.placa.toUpperCase() === alvo);
+}
+
+// ===== Visões do FUNCIONÁRIO (sem dinheiro) =====
+//
+// O funcionário nunca lê custo, custo_total, taxa nem lucro (CLAUDE.md §4 e §11).
+// No banco isso vira "views sem as colunas de dinheiro". Aqui, na camada de
+// dados, as funções do funcionário DEVOLVEM tipos que nem sequer carregam esses
+// campos — a tela não tem como mostrar o que não recebe. O corte mora aqui, não
+// na tela. Só o preço de venda chega ao funcionário (ele vende por esse valor).
+
+export interface ItemCatalogoFuncionario {
+  id: string;
+  nome: string;
+  tipo: TipoItem;
+  precoCentavos: number;
+  estoque: number;
+  estoqueMinimo: number;
+}
+
+/** Catálogo do funcionário: só preço de venda e estoque — nunca custo. */
+export async function listarCatalogoFuncionario(): Promise<
+  ItemCatalogoFuncionario[]
+> {
+  return catalogoMock.map(
+    ({ id, nome, tipo, precoCentavos, estoque, estoqueMinimo }) => ({
+      id,
+      nome,
+      tipo,
+      precoCentavos,
+      estoque,
+      estoqueMinimo,
+    }),
+  );
+}
+
+export interface ItemOrdemFuncionario {
+  nome: string;
+  tipo: TipoItem;
+  quantidade: number;
+}
+
+export interface OrdemFuncionario {
+  id: string;
+  placa: string;
+  modelo: string;
+  status: StatusOS;
+  autor: string;
+  diasAtras: number;
+  itens: ItemOrdemFuncionario[];
+}
+
+/** Converte uma OS para a visão do funcionário, descartando custo/taxa/total. */
+function paraOrdemFuncionario(o: OrdemMock): OrdemFuncionario {
+  return {
+    id: o.id,
+    placa: o.placa,
+    modelo: o.modelo,
+    status: o.status,
+    autor: o.autor,
+    diasAtras: o.diasAtras,
+    itens: o.itens.map(({ nome, tipo, quantidade }) => ({
+      nome,
+      tipo,
+      quantidade,
+    })),
+  };
+}
+
+/** Pátio do funcionário: OS abertas, sem valores. */
+export async function listarOrdensAbertasFuncionario(): Promise<
+  OrdemFuncionario[]
+> {
+  return ordensMock
+    .filter((os) => os.status !== "entregue" && os.status !== "cancelado")
+    .map(paraOrdemFuncionario);
+}
+
+/** Lançamentos do próprio funcionário (Meus lançamentos), mais recentes primeiro. */
+export async function listarMeusLancamentos(
+  autor: string = funcionarioLogadoMock,
+): Promise<OrdemFuncionario[]> {
+  return ordensMock
+    .filter((o) => o.autor === autor)
+    .sort((a, b) => a.diasAtras - b.diasAtras)
+    .map(paraOrdemFuncionario);
+}
+
+/** Histórico por placa para o funcionário: sem total gasto do cliente, sem lucro. */
+export async function listarOrdensDoVeiculoFuncionario(
+  placa: string,
+): Promise<OrdemFuncionario[]> {
+  const alvo = placa.trim().toUpperCase();
+  return ordensMock
+    .filter((o) => o.placa.toUpperCase() === alvo)
+    .map(paraOrdemFuncionario);
+}
+
+export interface ContaFuncionario {
+  nome: string;
+  empresaNome: string;
+}
+
+/** Dados da Conta do funcionário (sem nada financeiro). */
+export async function lerDadosContaFuncionario(): Promise<ContaFuncionario> {
+  return { nome: funcionarioLogadoMock, empresaNome: empresaMock.nome };
 }

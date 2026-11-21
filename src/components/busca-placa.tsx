@@ -6,8 +6,11 @@ import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-/** Busca por placa no topo do Painel → ficha do veículo (histórico de OS). */
-export function BuscaPlaca() {
+/**
+ * Busca por placa → ficha do veículo (histórico de OS).
+ * `base` define a área: `/patrao` (padrão) ou `/funcionario`.
+ */
+export function BuscaPlaca({ base = "/patrao" }: { base?: string }) {
   const router = useRouter();
   const [placa, setPlaca] = useState("");
 
@@ -17,7 +20,7 @@ export function BuscaPlaca() {
         e.preventDefault();
         const p = placa.trim();
         if (p)
-          router.push(`/patrao/veiculo/${encodeURIComponent(p.toUpperCase())}`);
+          router.push(`${base}/veiculo/${encodeURIComponent(p.toUpperCase())}`);
       }}
       className="flex gap-2"
     >

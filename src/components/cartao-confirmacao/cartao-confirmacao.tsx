@@ -24,9 +24,16 @@ export interface DadosConfirmacao {
 export function CartaoConfirmacao({
   dados,
   mostrarDinheiro = true,
+  campoCustoPeca = false,
 }: {
   dados: DadosConfirmacao;
   mostrarDinheiro?: boolean;
+  /**
+   * Campo onde o FUNCIONÁRIO informa quanto pagou numa peça que ele mesmo
+   * comprou (CLAUDE.md §11). É um valor que ele digita — não revela custo nem
+   * lucro do catálogo. Só o patrão enxerga esse número depois.
+   */
+  campoCustoPeca?: boolean;
 }) {
   const lucroCentavos =
     dados.totalCentavos - dados.custoCentavos - dados.taxaCentavos;
@@ -94,6 +101,29 @@ export function CartaoConfirmacao({
         <div className="flex items-center gap-2 rounded-xl bg-atencao-fundo px-3 py-2 text-legenda text-atencao">
           <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
           Atenção: esse serviço está dando prejuízo.
+        </div>
+      ) : null}
+
+      {campoCustoPeca ? (
+        <div className="space-y-1.5 rounded-xl border border-linha bg-fundo p-3">
+          <label
+            htmlFor="custo-peca-comprada"
+            className="block text-legenda font-medium text-texto"
+          >
+            Comprou alguma peça pra esse serviço?
+          </label>
+          <p className="text-legenda text-texto-secundario">
+            Informe quanto você pagou. Só o patrão vê esse valor.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-corpo text-texto-secundario">R$</span>
+            <input
+              id="custo-peca-comprada"
+              inputMode="decimal"
+              placeholder="0,00"
+              className="h-12 flex-1 rounded-xl border border-linha bg-superficie px-3 text-corpo text-texto outline-none placeholder:text-texto-secundario focus-visible:ring-2 focus-visible:ring-principal"
+            />
+          </div>
         </div>
       ) : null}
 

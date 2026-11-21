@@ -1,14 +1,21 @@
-import { Package } from "lucide-react";
+import { EstoqueFuncionario } from "@/components/estoque-funcionario";
+import { listarCatalogoFuncionario } from "@/lib/dados";
 
-import { TelaPlaceholder } from "@/components/tela-placeholder";
+// Consulta de estoque do funcionário: só quantidade e preço de venda,
+// sem custo nem lucro. O funcionário não ajusta estoque — só avisa falta.
+export default async function EstoqueFuncionarioPage() {
+  const itens = await listarCatalogoFuncionario();
 
-export default function EstoqueFuncionario() {
   return (
-    <TelaPlaceholder
-      titulo="Estoque"
-      descricao="Consulta de quantidade e preço de venda (sem custo), com o botão de avisar falta."
-      fasePrevista="a Fase 3"
-      icone={Package}
-    />
+    <section className="space-y-5">
+      <h1 className="font-grotesk text-titulo font-bold text-principal">
+        Estoque
+      </h1>
+      <p className="text-corpo text-texto-secundario">
+        Veja o que tem e o preço de venda. Faltando algo? Toque em “Avisar
+        falta”.
+      </p>
+      <EstoqueFuncionario itens={itens} />
+    </section>
   );
 }

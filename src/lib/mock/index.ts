@@ -383,6 +383,12 @@ export const funcionariosMock: FuncionarioMock[] = [
   { id: "f-1", nome: "Carlos", ativo: true, osNoMes: 18 },
 ];
 
+/**
+ * Funcionário "logado" nas fases de frontend (fictício). Serve para filtrar
+ * "Meus lançamentos" e saudação da Conta. Na Fase 10 vem do login real.
+ */
+export const funcionarioLogadoMock = "Carlos";
+
 // ----- Histórico de alterações (tela Conta) -----
 export interface AlteracaoMock {
   id: string;
