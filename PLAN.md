@@ -89,6 +89,7 @@ Nenhuma branch vai para a `main` sem passar por estes três crivos. Rode e regis
   - Os componentes aparecem na vitrine, corretos em 360px e no desktop.
 
 ## Fase 2 — Telas do patrão (fictício)
+- **Status**: ✅ Concluída (21/11/2026) — mesclada na `main` e removida. Vistoria verde (typecheck/lint/build).
 - **Branch**: `fase-02-front-patrao`
 - **Objetivo**: todas as telas do patrão navegáveis e preenchidas com dados fictícios.
 - **Fonte dos dados**: `fictício`.
@@ -286,7 +287,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | --- | --- | --- | --- |
 | 0 ✅ | `fase-00-setup` | Projeto + identidade visual + PWA na Vercel | — |
 | 1 ✅ | `fase-01-design-system` | Componentes + navegação por perfil | fictício |
-| 2 | `fase-02-front-patrao` | Telas do patrão | fictício |
+| 2 ✅ | `fase-02-front-patrao` | Telas do patrão | fictício |
 | 3 | `fase-03-front-funcionario` | Telas do funcionário (sem dinheiro) | fictício |
 | 4 | `fase-04-front-onboarding` | Onboarding + login/convite | fictício |
 | 5 | `fase-05-front-admin` | Painel admin | fictício |
