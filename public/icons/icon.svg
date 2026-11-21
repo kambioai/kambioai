@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#0F2A4A"/>
+  <!-- "K" desenhado em vetor (sem depender de fonte) -->
+  <g fill="#FFFFFF">
+    <rect x="150" y="140" width="52" height="232" rx="6"/>
+    <polygon points="202,256 322,140 364,140 232,272"/>
+    <polygon points="232,246 364,372 322,372 202,262"/>
+  </g>
+  <!-- ponto laranja no canto -->
+  <circle cx="372" cy="156" r="34" fill="#E8590C"/>
+</svg>

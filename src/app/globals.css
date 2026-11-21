@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Variáveis semânticas (shadcn/ui) mapeadas à Identidade visual do Kambio.
+  Valores em HSL (sem a função hsl()), como o shadcn espera.
+  Só tema claro no MVP.
+*/
+@layer base {
+  :root {
+    --background: 214 25% 96%; /* fundo  #F3F5F8 */
+    --foreground: 217 46% 10%; /* texto  #0E1726 */
+
+    --card: 0 0% 100%; /* superfície #FFFFFF */
+    --card-foreground: 217 46% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 46% 10%;
+
+    --primary: 212 66% 17%; /* marinho #0F2A4A */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 212 66% 17%;
+
+    --muted: 214 25% 96%;
+    --muted-foreground: 216 14% 39%; /* texto-secundário #556070 */
+
+    --accent: 21 90% 48%; /* laranja #E8590C */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 4 76% 40%; /* erro #B42318 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 216 20% 91%; /* linha #E2E6EC */
+    --input: 216 20% 91%;
+    --ring: 212 66% 17%;
+
+    --radius: 0.75rem; /* 12px */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-fundo text-texto;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+}

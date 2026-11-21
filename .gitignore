@@ -1,0 +1,31 @@
+# dependências
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# produção / testes
+/coverage
+
+# variáveis de ambiente (nunca commitar segredos)
+.env
+.env*.local
+
+# vercel / supabase
+.vercel
+.supabase
+
+# sistema operacional / editor
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+.idea
+.vscode/*
+!.vscode/extensions.json
