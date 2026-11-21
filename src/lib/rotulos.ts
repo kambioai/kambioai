@@ -25,3 +25,18 @@ export const rotuloSegmento: Record<Segmento, string> = {
   troca_oleo: "Troca de óleo",
   borracharia: "Borracharia",
 };
+
+export type StatusAssinatura =
+  | "ativa"
+  | "teste"
+  | "inadimplente"
+  | "bloqueada"
+  | "cancelada";
+
+export const rotuloStatusAssinatura: Record<StatusAssinatura, string> = {
+  ativa: "Ativa",
+  teste: "Em teste",
+  inadimplente: "Inadimplente",
+  bloqueada: "Bloqueada",
+  cancelada: "Cancelada",
+};

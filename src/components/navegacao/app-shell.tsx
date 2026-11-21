@@ -16,12 +16,16 @@ export function AppShell({
   perfil: PerfilApp;
   children: ReactNode;
 }) {
+  // O admin é pensado para o computador, então o conteúdo pode ser mais largo.
+  const largura = perfil === "admin" ? "max-w-5xl" : "max-w-3xl";
   return (
     <div className="min-h-dvh">
       <NavegacaoPerfil perfil={perfil} />
       <div className="md:pl-60">
         <TopoApp perfil={perfil} />
-        <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-5 md:pb-10">
+        <main
+          className={`mx-auto w-full px-4 pb-28 pt-5 md:pb-10 ${largura}`}
+        >
           {children}
         </main>
       </div>
