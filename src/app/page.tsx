@@ -78,6 +78,32 @@ export default function Home() {
         })}
       </nav>
 
+      <div className="space-y-2">
+        <p className="text-center text-legenda font-medium text-texto-secundario">
+          Fluxo de entrada (Fase 4)
+        </p>
+        <nav
+          className="flex flex-wrap justify-center gap-2"
+          aria-label="Telas de acesso e onboarding"
+        >
+          {[
+            { nome: "Entrar", href: "/entrar" },
+            { nome: "Criar conta", href: "/criar-conta" },
+            { nome: "Escolher plano", href: "/escolher-plano" },
+            { nome: "Começar (onboarding)", href: "/comecar" },
+            { nome: "Aceitar convite", href: "/convite" },
+          ].map((tela) => (
+            <Link
+              key={tela.href}
+              href={tela.href}
+              className="rounded-full border border-linha bg-superficie px-4 py-2 text-legenda font-medium text-principal outline-none hover:border-principal focus-visible:ring-2 focus-visible:ring-principal"
+            >
+              {tela.nome}
+            </Link>
+          ))}
+        </nav>
+      </div>
+
       <div className="text-center">
         <Link
           href="/componentes"

@@ -19,6 +19,7 @@ import {
   taxasMock,
   veiculosMock,
   type AlteracaoMock,
+  type CustoFixoMock,
   type FuncionarioMock,
   type ItemCatalogoMock,
   type OrdemMock,
@@ -77,6 +78,19 @@ export async function listarFuncionarios(): Promise<FuncionarioMock[]> {
 
 export async function listarTaxas(): Promise<TaxaMock[]> {
   return taxasMock;
+}
+
+export async function listarCustosFixos(): Promise<CustoFixoMock[]> {
+  return custosFixosMock;
+}
+
+/**
+ * Catálogo modelo do segmento (CLAUDE.md §5b): itens prontos que o patrão só
+ * ajusta no onboarding. Na fase fictícia devolve o catálogo da oficina de moto;
+ * na Fase 7 passa a vir do modelo real mantido pelo admin, por segmento.
+ */
+export async function listarCatalogoModelo(): Promise<ItemCatalogoMock[]> {
+  return catalogoMock;
 }
 
 // ----- Painel -----
