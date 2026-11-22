@@ -184,6 +184,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
   - Uma empresa nova sai do cadastro com catálogo, estoque, custos e taxas gravados e aparece nas telas.
 
 ## Fase 8 — Pipeline de voz e gravação de OS
+- **Status**: ✅ Concluída (22/11/2026) — mesclada na `main` e removida. Falar grava por voz/texto → Gemini 3.1 Flash-Lite → cálculo no servidor → cartão → `registrar_os` (OS + baixa de estoque + movimento em transação). Chave do Gemini em produção (Vercel). Testes verdes (cálculo de lucro/taxa, JSON da IA, placa). *(Backlog p/ revisão: cartão editável com um toque → Fase 9; aviso "Desfazer" 5s; testar voz do funcionário na Fase 10.)*
 - **Branch**: `fase-08-voz`
 - **Objetivo**: o coração do produto — falar uma frase e salvar uma OS de verdade.
 - **Fonte dos dados**: `real` (Gemini + Supabase).
@@ -298,7 +299,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 5 ✅ | `fase-05-front-admin` | Painel admin | fictício |
 | 6 ✅ | `fase-06-banco-rls` | Banco + RLS + views + login real | real |
 | 7 ✅ | `fase-07-onboarding-real` | Cadastro da empresa + catálogo real | real |
-| 8 | `fase-08-voz` | Pipeline de voz + OS transacional | real |
+| 8 ✅ | `fase-08-voz` | Pipeline de voz + OS transacional | real |
 | 9 | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
 | 10 | `fase-10-equipe` | Convite + permissões do funcionário | real |
 | 11 | `fase-11-stripe` | Assinatura + régua de cobrança | real |
