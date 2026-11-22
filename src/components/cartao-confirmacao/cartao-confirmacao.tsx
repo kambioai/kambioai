@@ -25,9 +25,17 @@ export function CartaoConfirmacao({
   dados,
   mostrarDinheiro = true,
   campoCustoPeca = false,
+  onConfirmar,
+  onCorrigir,
+  salvando = false,
 }: {
   dados: DadosConfirmacao;
   mostrarDinheiro?: boolean;
+  /** Ação do "Cadastrar agora" (quando ausente, botão fica só visual). */
+  onConfirmar?: () => void;
+  /** Ação do "Corrigir". */
+  onCorrigir?: () => void;
+  salvando?: boolean;
   /**
    * Campo onde o FUNCIONÁRIO informa quanto pagou numa peça que ele mesmo
    * comprou (CLAUDE.md §11). É um valor que ele digita — não revela custo nem
@@ -128,10 +136,20 @@ export function CartaoConfirmacao({
       ) : null}
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <Button variant="principal" className="flex-1">
-          Cadastrar agora
+        <Button
+          variant="principal"
+          className="flex-1"
+          onClick={onConfirmar}
+          disabled={salvando}
+        >
+          {salvando ? "Salvando..." : "Cadastrar agora"}
         </Button>
-        <Button variant="secundario" className="flex-1">
+        <Button
+          variant="secundario"
+          className="flex-1"
+          onClick={onCorrigir}
+          disabled={salvando}
+        >
           Corrigir
         </Button>
       </div>

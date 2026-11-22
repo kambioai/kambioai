@@ -974,6 +974,23 @@ export type Database = {
       empresas_do_usuario: { Args: never; Returns: string[] }
       entrar_como_funcionario_demo: { Args: never; Returns: undefined }
       entrar_como_patrao_demo: { Args: never; Returns: undefined }
+      registrar_os: {
+        Args: {
+          p_cliente_id: string
+          p_custo_total: number
+          p_empresa_id: string
+          p_forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          p_itens: Json
+          p_origem: Database["public"]["Enums"]["origem_lancamento"]
+          p_parcelas: number
+          p_status: Database["public"]["Enums"]["status_os"]
+          p_taxa: number
+          p_total: number
+          p_transcricao: string
+          p_veiculo_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       forma_pagamento: "pix" | "dinheiro" | "debito" | "credito"

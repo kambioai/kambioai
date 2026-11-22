@@ -15,6 +15,7 @@
     "gerar-icones": "node scripts/gerar-icones.mjs"
   },
   "dependencies": {
+    "@google/genai": "^3.6.1",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@supabase/ssr": "^0.12.7",
