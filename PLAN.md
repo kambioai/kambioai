@@ -152,6 +152,7 @@ Nenhuma branch vai para a `main` sem passar por estes três crivos. Rode e regis
 A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de `src/lib/dados/`, mantendo as telas iguais. Toda fase de backend inclui os testes de segurança correspondentes.
 
 ## Fase 6 — Banco, multi-tenant e auth
+- **Status**: ✅ Concluída (21/11/2026) — mesclada na `main` e removida. Migrações aplicadas no Supabase; login real; `src/lib/dados` lendo do Supabase sob RLS. Testes de isolamento e de funcionário-sem-custo passam contra o banco real. (Pendência de produção: definir as variáveis do Supabase na Vercel — ver §deploy.)
 - **Branch**: `fase-06-banco-rls`
 - **Objetivo**: Supabase com o modelo de dados completo, isolamento por empresa e login real.
 - **Fonte dos dados**: `real` (Supabase).
@@ -294,7 +295,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 3 ✅ | `fase-03-front-funcionario` | Telas do funcionário (sem dinheiro) | fictício |
 | 4 ✅ | `fase-04-front-onboarding` | Onboarding + login/convite | fictício |
 | 5 ✅ | `fase-05-front-admin` | Painel admin | fictício |
-| 6 | `fase-06-banco-rls` | Banco + RLS + views + login real | real |
+| 6 ✅ | `fase-06-banco-rls` | Banco + RLS + views + login real | real |
 | 7 | `fase-07-onboarding-real` | Cadastro da empresa + catálogo real | real |
 | 8 | `fase-08-voz` | Pipeline de voz + OS transacional | real |
 | 9 | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
