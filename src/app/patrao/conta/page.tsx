@@ -1,3 +1,4 @@
+import { BotaoSair } from "@/components/auth/botao-sair";
 import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
@@ -84,9 +85,7 @@ export default async function Conta() {
         <Button variant="secundario" className="flex-1">
           Exportar dados
         </Button>
-        <Button variant="secundario" className="flex-1">
-          Sair
-        </Button>
+        <BotaoSair className="flex-1" />
       </div>
     </section>
   );

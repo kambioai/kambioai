@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -8,6 +9,8 @@ import { z } from "zod";
 
 import { CampoTexto } from "@/components/auth/campo-texto";
 import { Button } from "@/components/ui/button";
+import { rotaPorPapel } from "@/lib/auth/rota-por-papel";
+import { criarClienteNavegador } from "@/lib/supabase/client";
 
 const esquema = z.object({
   email: z.string().email("Digite um e-mail válido."),
@@ -18,19 +21,36 @@ type Dados = z.infer<typeof esquema>;
 
 export function FormularioEntrar() {
   const router = useRouter();
+  const [erro, setErro] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<Dados>({ resolver: zodResolver(esquema) });
 
-  // Fictício (Fase 4): o login real entra na Fase 6. Aqui só leva ao app.
-  function aoEnviar() {
-    router.push("/patrao/painel");
+  async function aoEnviar(dados: Dados) {
+    setErro(null);
+    const supabase = criarClienteNavegador();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: dados.email,
+      password: dados.senha,
+    });
+    if (error) {
+      setErro("E-mail ou senha incorretos.");
+      return;
+    }
+    const rota = await rotaPorPapel(supabase);
+    router.push(rota);
+    router.refresh();
   }
 
   return (
     <form onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
+      {erro ? (
+        <p className="rounded-xl bg-erro-fundo px-3 py-2 text-legenda text-erro">
+          {erro}
+        </p>
+      ) : null}
       <CampoTexto
         label="E-mail"
         type="email"
@@ -56,7 +76,7 @@ export function FormularioEntrar() {
         </Link>
       </div>
       <Button type="submit" className="w-full" disabled={isSubmitting}>
-        Entrar
+        {isSubmitting ? "Entrando..." : "Entrar"}
       </Button>
     </form>
   );

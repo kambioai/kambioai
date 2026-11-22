@@ -1,5 +1,6 @@
 import { ClipboardList } from "lucide-react";
 
+import { BotaoSair } from "@/components/auth/botao-sair";
 import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { EstadoVazio } from "@/components/estado-vazio/estado-vazio";
@@ -80,9 +81,7 @@ export default async function ContaFuncionario() {
         )}
       </div>
 
-      <Button variant="secundario" className="w-full">
-        Sair
-      </Button>
+      <BotaoSair className="w-full" />
     </section>
   );
 }

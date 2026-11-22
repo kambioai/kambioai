@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +8,7 @@ import { z } from "zod";
 
 import { CampoTexto } from "@/components/auth/campo-texto";
 import { Button } from "@/components/ui/button";
+import { criarClienteNavegador } from "@/lib/supabase/client";
 
 const esquema = z.object({
   nome: z.string().min(2, "Digite seu nome."),
@@ -19,19 +21,53 @@ type Dados = z.infer<typeof esquema>;
 
 export function FormularioCriarConta() {
   const router = useRouter();
+  const [erro, setErro] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<Dados>({ resolver: zodResolver(esquema) });
 
-  // Fictício: depois de criar a conta, escolhe o plano e começa a configurar.
-  function aoEnviar() {
-    router.push("/escolher-plano");
+  async function aoEnviar(dados: Dados) {
+    setErro(null);
+    setAviso(null);
+    const supabase = criarClienteNavegador();
+    const { data, error } = await supabase.auth.signUp({
+      email: dados.email,
+      password: dados.senha,
+      options: { data: { nome: dados.nome, celular: dados.celular } },
+    });
+    if (error) {
+      setErro(error.message);
+      return;
+    }
+    if (!data.session) {
+      // Confirmação de e-mail ligada: não há sessão ainda.
+      setAviso(
+        "Conta criada! Confirme pelo link que enviamos no seu e-mail para entrar.",
+      );
+      return;
+    }
+    // Fase 6 (demo): entra na oficina de exemplo como patrão para já ver dados
+    // reais. Na Fase 7 isso vira o cadastro real da empresa + onboarding.
+    await supabase.rpc("entrar_como_patrao_demo");
+    router.push("/patrao/painel");
+    router.refresh();
   }
 
   return (
     <form onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
+      {erro ? (
+        <p className="rounded-xl bg-erro-fundo px-3 py-2 text-legenda text-erro">
+          {erro}
+        </p>
+      ) : null}
+      {aviso ? (
+        <p className="rounded-xl bg-atencao-fundo px-3 py-2 text-legenda text-atencao">
+          {aviso}
+        </p>
+      ) : null}
       <CampoTexto
         label="Seu nome"
         autoComplete="name"
@@ -65,7 +101,7 @@ export function FormularioCriarConta() {
         {...register("senha")}
       />
       <Button type="submit" className="w-full" disabled={isSubmitting}>
-        Criar conta
+        {isSubmitting ? "Criando..." : "Criar conta"}
       </Button>
     </form>
   );
