@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,7 +19,6 @@ const esquema = z.object({
 type Dados = z.infer<typeof esquema>;
 
 export function FormularioCriarConta() {
-  const router = useRouter();
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const {
@@ -52,8 +50,9 @@ export function FormularioCriarConta() {
     // Fase 6 (demo): entra na oficina de exemplo como patrão para já ver dados
     // reais. Na Fase 7 isso vira o cadastro real da empresa + onboarding.
     await supabase.rpc("entrar_como_patrao_demo");
-    router.push("/patrao/painel");
-    router.refresh();
+    // Recarregamento completo: leva o cookie de sessão junto, caindo direto no
+    // painel em vez de bater no login (middleware).
+    window.location.assign("/patrao/painel");
   }
 
   return (

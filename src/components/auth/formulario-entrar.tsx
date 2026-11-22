@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,7 +19,6 @@ const esquema = z.object({
 type Dados = z.infer<typeof esquema>;
 
 export function FormularioEntrar() {
-  const router = useRouter();
   const [erro, setErro] = useState<string | null>(null);
   const {
     register,
@@ -40,8 +38,10 @@ export function FormularioEntrar() {
       return;
     }
     const rota = await rotaPorPapel(supabase);
-    router.push(rota);
-    router.refresh();
+    // Navegação com recarregamento completo: garante que o cookie de sessão
+    // recém-gravado acompanhe a requisição, evitando que o middleware ache que
+    // ainda não há login e devolva para esta tela.
+    window.location.assign(rota);
   }
 
   return (
