@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protegidas = ["/patrao", "/funcionario"];
+  const protegidas = ["/patrao", "/funcionario", "/comecar"];
   const precisaLogin = protegidas.some((p) =>
     request.nextUrl.pathname.startsWith(p),
   );
@@ -50,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/patrao/:path*", "/funcionario/:path*"],
+  matcher: ["/patrao/:path*", "/funcionario/:path*", "/comecar"],
 };

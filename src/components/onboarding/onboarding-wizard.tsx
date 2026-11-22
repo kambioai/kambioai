@@ -1,20 +1,33 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 import { BotaoFalar } from "@/components/botao-falar/botao-falar";
 import { Button } from "@/components/ui/button";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
-import { rotuloPagamento, rotuloSegmento } from "@/lib/rotulos";
-import type { ItemCatalogoMock, CustoFixoMock, TaxaMock } from "@/lib/mock";
+import {
+  custosFixosPadrao,
+  modelosCatalogo,
+} from "@/lib/onboarding/modelos-catalogo";
+import { rotuloSegmento } from "@/lib/rotulos";
+import { criarEmpresa, salvarConfiguracaoInicial } from "@/server/onboarding";
 import type { Segmento } from "@/types";
 
-// Estado editável local — tudo fictício (Fase 4). Dinheiro em centavos inteiros,
-// mesmo aqui (nunca float pra dinheiro). A gravação real entra na Fase 7.
-interface ItemEditavel extends ItemCatalogoMock {
+interface ItemEditavel {
   chave: string;
+  nome: string;
+  tipo: "produto" | "servico";
+  custoCentavos: number;
+  precoCentavos: number;
+  estoque: number;
+  estoqueMinimo: number;
+}
+
+interface CustoEditavel {
+  chave: string;
+  nome: string;
+  valorCentavos: number;
 }
 
 const PASSOS = [
@@ -27,60 +40,139 @@ const PASSOS = [
 ] as const;
 
 const SEGMENTOS = Object.keys(rotuloSegmento) as Segmento[];
+const MAX_PARCELAS = 12;
 
-export function OnboardingWizard({
-  catalogoInicial,
-  custosIniciais,
-  taxasIniciais,
-}: {
-  catalogoInicial: ItemCatalogoMock[];
-  custosIniciais: CustoFixoMock[];
-  taxasIniciais: TaxaMock[];
-}) {
-  const router = useRouter();
+let contador = 0;
+const novaChave = () => `k${contador++}`;
+
+export function OnboardingWizard() {
   const [passo, setPasso] = useState(0);
+  const [erro, setErro] = useState<string | null>(null);
+  const [ocupado, setOcupado] = useState(false);
 
-  // Passo 1 — empresa
+  // Passo 0 — empresa
   const [nome, setNome] = useState("");
   const [cidade, setCidade] = useState("");
   const [segmento, setSegmento] = useState<Segmento>("oficina_moto");
 
-  // Passo 2/3 — catálogo e estoque
-  const [itens, setItens] = useState<ItemEditavel[]>(
-    catalogoInicial.map((i, n) => ({ ...i, chave: `${i.id}-${n}` })),
+  // Passo 1/2 — catálogo e estoque
+  const [itens, setItens] = useState<ItemEditavel[]>([]);
+
+  // Passo 3 — custos e taxas
+  const [custos, setCustos] = useState<CustoEditavel[]>(
+    custosFixosPadrao.map((c) => ({ ...c, chave: novaChave() })),
   );
-
-  // Passo 4 — custos fixos e taxas
-  const [custos, setCustos] = useState<CustoFixoMock[]>(custosIniciais);
-  const [taxas, setTaxas] = useState<TaxaMock[]>(taxasIniciais);
-
-  // Passo 5 — convites
-  const [emails, setEmails] = useState<string[]>([""]);
+  const [taxaDebito, setTaxaDebito] = useState(2);
+  const [taxasCredito, setTaxasCredito] = useState<number[]>(() => {
+    const arr = Array<number>(MAX_PARCELAS).fill(0);
+    arr[0] = 3.5;
+    return arr;
+  });
 
   const total = PASSOS.length;
   const progresso = Math.round(((passo + 1) / total) * 100);
 
-  function avancar() {
-    setPasso((p) => Math.min(p + 1, total - 1));
-  }
   function voltar() {
-    if (passo === 0) router.push("/escolher-plano");
-    else setPasso((p) => Math.max(p - 1, 0));
+    setErro(null);
+    setPasso((p) => Math.max(p - 1, 0));
   }
 
+  async function concluirEmpresa() {
+    setErro(null);
+    setOcupado(true);
+    const r = await criarEmpresa({ nome, cidade, segmento });
+    setOcupado(false);
+    if (!r.ok) {
+      setErro(r.erro);
+      return;
+    }
+    setItens(
+      modelosCatalogo[segmento].map((m) => ({ ...m, chave: novaChave() })),
+    );
+    setPasso(1);
+  }
+
+  async function concluir() {
+    setErro(null);
+    setOcupado(true);
+    const taxas = [
+      { forma: "debito" as const, parcelas: 1, percentual: taxaDebito },
+      ...taxasCredito.map((p, i) => ({
+        forma: "credito" as const,
+        parcelas: i + 1,
+        percentual: p,
+      })),
+    ];
+    const r = await salvarConfiguracaoInicial({
+      itens: itens
+        .filter((i) => i.nome.trim() !== "")
+        .map((i) => ({
+          nome: i.nome.trim(),
+          tipo: i.tipo,
+          custoCentavos: i.tipo === "servico" ? 0 : i.custoCentavos,
+          precoCentavos: i.precoCentavos,
+          estoque: i.estoque,
+          estoqueMinimo: i.estoqueMinimo,
+        })),
+      custos: custos
+        .filter((c) => c.nome.trim() !== "")
+        .map((c) => ({ nome: c.nome.trim(), valorCentavos: c.valorCentavos })),
+      taxas,
+    });
+    setOcupado(false);
+    if (!r.ok) {
+      setErro(r.erro);
+      return;
+    }
+    window.location.assign("/patrao/painel");
+  }
+
+  // ----- edição de itens -----
   type CampoNumerico =
     | "custoCentavos"
     | "precoCentavos"
     | "estoque"
     | "estoqueMinimo";
-
   function atualizarItem(chave: string, campo: CampoNumerico, valor: number) {
-    setItens((lista) =>
-      lista.map((i) => (i.chave === chave ? { ...i, [campo]: valor } : i)),
+    setItens((l) => l.map((i) => (i.chave === chave ? { ...i, [campo]: valor } : i)));
+  }
+  function atualizarNome(chave: string, nome: string) {
+    setItens((l) => l.map((i) => (i.chave === chave ? { ...i, nome } : i)));
+  }
+  function atualizarTipo(chave: string, tipo: "produto" | "servico") {
+    setItens((l) =>
+      l.map((i) =>
+        i.chave === chave
+          ? { ...i, tipo, custoCentavos: tipo === "servico" ? 0 : i.custoCentavos }
+          : i,
+      ),
     );
   }
   function apagarItem(chave: string) {
-    setItens((lista) => lista.filter((i) => i.chave !== chave));
+    setItens((l) => l.filter((i) => i.chave !== chave));
+  }
+  function adicionarItem() {
+    setItens((l) => [
+      {
+        chave: novaChave(),
+        nome: "",
+        tipo: "produto",
+        custoCentavos: 0,
+        precoCentavos: 0,
+        estoque: 0,
+        estoqueMinimo: 0,
+      },
+      ...l,
+    ]);
+  }
+
+  function avancarCatalogo() {
+    if (itens.filter((i) => i.nome.trim() !== "").length === 0) {
+      setErro("Adicione pelo menos um item ao catálogo para continuar.");
+      return;
+    }
+    setErro(null);
+    setPasso(2); // vai para o estoque
   }
 
   const produtos = itens.filter((i) => i.tipo === "produto");
@@ -113,7 +205,13 @@ export function OnboardingWizard({
         </h2>
       </div>
 
-      {/* Conteúdo do passo */}
+      {erro ? (
+        <p className="rounded-xl bg-erro-fundo px-3 py-2 text-legenda text-erro">
+          {erro}
+        </p>
+      ) : null}
+
+      {/* Passo 0 — empresa */}
       {passo === 0 ? (
         <div className="space-y-4">
           <Campo label="Nome da oficina">
@@ -138,86 +236,110 @@ export function OnboardingWizard({
               onChange={(e) => setSegmento(e.target.value as Segmento)}
               className={entradaClasse}
             >
-              {SEGMENTOS.map((s) => (
-                <option key={s} value={s}>
-                  {rotuloSegmento[s]}
+              {SEGMENTOS.map((sg) => (
+                <option key={sg} value={sg}>
+                  {rotuloSegmento[sg]}
                 </option>
               ))}
             </select>
           </Campo>
           <p className="text-legenda text-texto-secundario">
             Pelo segmento a gente já traz um catálogo pronto no próximo passo —
-            você não começa do zero.
+            você ajusta e adiciona o que faltar.
           </p>
         </div>
       ) : null}
 
+      {/* Passo 1 — catálogo (obrigatório) */}
       {passo === 1 ? (
         <div className="space-y-4">
           <p className="text-corpo text-texto-secundario">
-            Já trouxemos os itens de{" "}
+            Itens de{" "}
             <strong className="text-texto">{rotuloSegmento[segmento]}</strong>.
-            Ajuste custo e preço e apague o que não usa.
+            Ajuste nome, custo e preço, apague o que não usa e adicione os seus.
           </p>
+
+          <Button variant="secundario" size="sm" onClick={adicionarItem}>
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Adicionar item
+          </Button>
+
           <ul className="space-y-3">
             {itens.map((item) => (
               <li
                 key={item.chave}
-                className="rounded-2xl border border-linha bg-superficie p-4"
+                className="space-y-3 rounded-2xl border border-linha bg-superficie p-4"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-texto">{item.nome}</p>
-                    <p className="text-legenda text-texto-secundario">
-                      {item.tipo === "produto" ? "Produto" : "Serviço"}
-                    </p>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={item.nome}
+                    onChange={(e) => atualizarNome(item.chave, e.target.value)}
+                    placeholder="Nome do item"
+                    aria-label="Nome do item"
+                    className="h-11 flex-1 rounded-xl border border-linha bg-superficie px-3 text-corpo text-texto outline-none placeholder:text-texto-secundario focus-visible:ring-2 focus-visible:ring-principal"
+                  />
                   <button
                     type="button"
                     onClick={() => apagarItem(item.chave)}
-                    aria-label={`Apagar ${item.nome}`}
+                    aria-label={`Apagar ${item.nome || "item"}`}
                     className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-texto-secundario outline-none hover:bg-fundo hover:text-erro focus-visible:ring-2 focus-visible:ring-principal"
                   >
                     <Trash2 className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  {item.tipo === "produto" ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <Campo label="Tipo">
+                    <select
+                      value={item.tipo}
+                      onChange={(e) =>
+                        atualizarTipo(
+                          item.chave,
+                          e.target.value as "produto" | "servico",
+                        )
+                      }
+                      className="h-12 w-full rounded-xl border border-linha bg-superficie px-3 text-corpo text-texto outline-none focus-visible:ring-2 focus-visible:ring-principal"
+                    >
+                      <option value="produto">Produto</option>
+                      <option value="servico">Serviço</option>
+                    </select>
+                  </Campo>
+                  <Campo label="Preço de venda (R$)">
                     <EntradaReais
-                      label="Custo (R$)"
-                      centavos={item.custoCentavos}
+                      centavos={item.precoCentavos}
                       onChange={(c) =>
-                        atualizarItem(item.chave, "custoCentavos", c)
+                        atualizarItem(item.chave, "precoCentavos", c)
                       }
                     />
-                  ) : (
-                    <div />
-                  )}
-                  <EntradaReais
-                    label="Preço (R$)"
-                    centavos={item.precoCentavos}
-                    onChange={(c) =>
-                      atualizarItem(item.chave, "precoCentavos", c)
-                    }
-                  />
+                  </Campo>
+                  {item.tipo === "produto" ? (
+                    <Campo label="Custo (R$)">
+                      <EntradaReais
+                        centavos={item.custoCentavos}
+                        onChange={(c) =>
+                          atualizarItem(item.chave, "custoCentavos", c)
+                        }
+                      />
+                    </Campo>
+                  ) : null}
                 </div>
               </li>
             ))}
           </ul>
           {itens.length === 0 ? (
             <p className="text-corpo text-texto-secundario">
-              Você apagou tudo. Adicione os itens da sua oficina na operação
-              depois, ou volte e mantenha alguns.
+              Nenhum item ainda — toque em “Adicionar item”.
             </p>
           ) : null}
         </div>
       ) : null}
 
+      {/* Passo 2 — estoque (pode fazer depois) */}
       {passo === 2 ? (
         <div className="space-y-4">
           <p className="text-corpo text-texto-secundario">
             Quanto você tem hoje de cada produto e a partir de quanto quer ser
-            avisado pra repor.
+            avisado pra repor. <strong>Esse passo pode ficar pra depois</strong>{" "}
+            — um funcionário pode fazer a contagem no sistema.
           </p>
           {produtos.length === 0 ? (
             <p className="text-corpo text-texto-secundario">
@@ -230,14 +352,14 @@ export function OnboardingWizard({
                   key={item.chave}
                   className="rounded-2xl border border-linha bg-superficie p-4"
                 >
-                  <p className="font-medium text-texto">{item.nome}</p>
+                  <p className="font-medium text-texto">
+                    {item.nome || "Sem nome"}
+                  </p>
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <EntradaInteiro
                       label="Tenho agora"
                       valor={item.estoque}
-                      onChange={(v) =>
-                        atualizarItem(item.chave, "estoque", v)
-                      }
+                      onChange={(v) => atualizarItem(item.chave, "estoque", v)}
                     />
                     <EntradaInteiro
                       label="Mínimo"
@@ -254,37 +376,72 @@ export function OnboardingWizard({
         </div>
       ) : null}
 
+      {/* Passo 3 — custos e taxas (obrigatório) */}
       {passo === 3 ? (
         <div className="space-y-6">
           <div className="space-y-3">
-            <h3 className="font-grotesk text-corpo font-bold text-principal">
-              Custos fixos do mês
-            </h3>
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-grotesk text-corpo font-bold text-principal">
+                Custos fixos do mês
+              </h3>
+              <Button
+                variant="secundario"
+                size="sm"
+                onClick={() =>
+                  setCustos((l) => [
+                    ...l,
+                    { chave: novaChave(), nome: "", valorCentavos: 0 },
+                  ])
+                }
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Adicionar
+              </Button>
+            </div>
             <ul className="space-y-3">
-              {custos.map((c, n) => (
-                <li
-                  key={c.id}
-                  className="flex items-center gap-3 rounded-xl border border-linha bg-superficie p-3"
-                >
-                  <span className="flex-1 text-corpo text-texto">{c.nome}</span>
+              {custos.map((c) => (
+                <li key={c.chave} className="flex items-center gap-2">
+                  <input
+                    value={c.nome}
+                    onChange={(e) =>
+                      setCustos((l) =>
+                        l.map((x) =>
+                          x.chave === c.chave ? { ...x, nome: e.target.value } : x,
+                        ),
+                      )
+                    }
+                    placeholder="Nome do custo"
+                    aria-label="Nome do custo"
+                    className="h-12 flex-1 rounded-xl border border-linha bg-superficie px-3 text-corpo text-texto outline-none placeholder:text-texto-secundario focus-visible:ring-2 focus-visible:ring-principal"
+                  />
                   <EntradaReais
                     centavos={c.valorCentavos}
                     onChange={(v) =>
-                      setCustos((lista) =>
-                        lista.map((x, i) =>
-                          i === n ? { ...x, valorCentavos: v } : x,
+                      setCustos((l) =>
+                        l.map((x) =>
+                          x.chave === c.chave ? { ...x, valorCentavos: v } : x,
                         ),
                       )
                     }
                     estreito
                   />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCustos((l) => l.filter((x) => x.chave !== c.chave))
+                    }
+                    aria-label="Remover custo"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-texto-secundario outline-none hover:bg-fundo hover:text-erro focus-visible:ring-2 focus-visible:ring-principal"
+                  >
+                    <Trash2 className="h-5 w-5" aria-hidden="true" />
+                  </button>
                 </li>
               ))}
             </ul>
             <p className="text-legenda text-texto-secundario">
               Total por mês:{" "}
               <ValorReais
-                centavos={custos.reduce((s, c) => s + c.valorCentavos, 0)}
+                centavos={custos.reduce((sm, c) => sm + c.valorCentavos, 0)}
                 className="text-texto"
               />
             </p>
@@ -294,131 +451,109 @@ export function OnboardingWizard({
             <h3 className="font-grotesk text-corpo font-bold text-principal">
               Taxas da maquininha
             </h3>
-            <ul className="space-y-3">
-              {taxas.map((t, n) => (
-                <li
-                  key={`${t.forma}-${t.parcelas}`}
-                  className="flex items-center gap-3 rounded-xl border border-linha bg-superficie p-3"
-                >
-                  <span className="flex-1 text-corpo text-texto">
-                    {rotuloPagamento[t.forma]}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="number"
-                      min={0}
-                      step="0.1"
-                      inputMode="decimal"
-                      value={t.percentual}
-                      onChange={(e) =>
-                        setTaxas((lista) =>
-                          lista.map((x, i) =>
-                            i === n
-                              ? { ...x, percentual: Number(e.target.value) || 0 }
-                              : x,
-                          ),
+            <p className="text-legenda text-texto-secundario">
+              Pix e dinheiro não têm taxa. Informe o débito e o crédito em cada
+              número de parcelas (em %).
+            </p>
+            <div className="flex items-center gap-3 rounded-xl border border-linha bg-superficie p-3">
+              <span className="flex-1 text-corpo text-texto">Débito</span>
+              <EntradaPercentual valor={taxaDebito} onChange={setTaxaDebito} />
+            </div>
+            <div className="rounded-xl border border-linha bg-superficie p-3">
+              <p className="mb-2 text-corpo text-texto">Crédito</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {taxasCredito.map((p, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <span className="w-8 shrink-0 text-legenda text-texto-secundario">
+                      {i + 1}x
+                    </span>
+                    <EntradaPercentual
+                      valor={p}
+                      rotulo={`Taxa do crédito em ${i + 1}x`}
+                      onChange={(v) =>
+                        setTaxasCredito((l) =>
+                          l.map((x, j) => (j === i ? v : x)),
                         )
                       }
-                      aria-label={`Taxa de ${rotuloPagamento[t.forma]} em %`}
-                      className="h-12 w-20 rounded-xl border border-linha bg-superficie px-3 text-right text-corpo text-texto outline-none focus-visible:ring-2 focus-visible:ring-principal"
                     />
-                    <span className="text-corpo text-texto-secundario">%</span>
                   </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      ) : null}
-
-      {passo === 4 ? (
-        <div className="space-y-4">
-          <p className="text-corpo text-texto-secundario">
-            Convide quem trabalha com você (opcional). Cada funcionário registra
-            serviço por voz, mas não vê dinheiro.
-          </p>
-          <div className="space-y-3">
-            {emails.map((email, n) => (
-              <div key={n} className="flex items-center gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) =>
-                    setEmails((lista) =>
-                      lista.map((x, i) => (i === n ? e.target.value : x)),
-                    )
-                  }
-                  placeholder="email@do-funcionario.com"
-                  aria-label={`E-mail do funcionário ${n + 1}`}
-                  className={entradaClasse}
-                />
-                {emails.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEmails((lista) => lista.filter((_, i) => i !== n))
-                    }
-                    aria-label="Remover convite"
-                    className="grid h-12 w-12 shrink-0 place-items-center rounded-lg text-texto-secundario outline-none hover:bg-fundo hover:text-erro focus-visible:ring-2 focus-visible:ring-principal"
-                  >
-                    <Trash2 className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                ) : null}
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-          <Button
-            variant="secundario"
-            size="sm"
-            onClick={() => setEmails((lista) => [...lista, ""])}
-          >
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            Adicionar outro
-          </Button>
+        </div>
+      ) : null}
+
+      {/* Passo 4 — convidar */}
+      {passo === 4 ? (
+        <div className="space-y-3">
+          <p className="text-corpo text-texto-secundario">
+            Depois você convida sua equipe pela tela <strong>Equipe</strong>.
+            Cada funcionário registra serviço por voz, mas não vê dinheiro.
+          </p>
           <p className="text-legenda text-texto-secundario">
-            O 1º funcionário muda o plano pra PRO; a partir do 3º, cada um custa
-            R$ 29,90/mês. (A cobrança de verdade entra na Fase 11.)
+            O convite por link entra na Fase 10. Siga para registrar sua primeira
+            venda.
           </p>
         </div>
       ) : null}
 
+      {/* Passo 5 — primeira venda */}
       {passo === 5 ? (
         <div className="flex flex-col items-center gap-5 text-center">
           <p className="max-w-sm text-corpo text-texto-secundario">
-            Tudo pronto! Agora é só registrar sua primeira venda. Toque em Falar
-            e diga algo como:
+            Tudo pronto! Salve e registre sua primeira venda. Toque em Falar e
+            diga algo como:
           </p>
           <p className="max-w-sm rounded-2xl border border-linha bg-superficie p-4 text-corpo text-texto">
             “Honda CG placa ABC1D23, troquei a pastilha e fiz alinhamento, 150 no
             crédito em 2 vezes.”
           </p>
           <BotaoFalar href="/patrao/falar" tamanho={72} />
-          <p className="text-legenda text-texto-secundario">
-            Tudo também funciona digitando.
-          </p>
         </div>
       ) : null}
 
       {/* Navegação */}
-      <div className="flex items-center justify-between gap-3 border-t border-linha pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-linha pt-5">
         <button
           type="button"
           onClick={voltar}
-          className="inline-flex items-center gap-1 text-corpo font-medium text-texto-secundario outline-none hover:text-principal focus-visible:text-principal"
+          disabled={passo === 0 || ocupado}
+          className="inline-flex items-center gap-1 text-corpo font-medium text-texto-secundario outline-none hover:text-principal focus-visible:text-principal disabled:opacity-40"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Voltar
         </button>
 
-        {passo < total - 1 ? (
-          <Button onClick={avancar}>
-            {passo === 4 ? "Pular e continuar" : "Continuar"}
-          </Button>
-        ) : (
-          <Button onClick={() => router.push("/patrao/painel")}>
-            Ir para o painel
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {passo === 2 ? (
+            <Button
+              variant="secundario"
+              onClick={() => setPasso(3)}
+              disabled={ocupado}
+            >
+              Fazer depois
+            </Button>
+          ) : null}
+
+          {passo === 0 ? (
+            <Button onClick={concluirEmpresa} disabled={ocupado}>
+              {ocupado ? "Criando..." : "Continuar"}
+            </Button>
+          ) : passo === 1 ? (
+            <Button onClick={avancarCatalogo} disabled={ocupado}>
+              Continuar
+            </Button>
+          ) : passo < total - 1 ? (
+            <Button onClick={() => setPasso((pp) => pp + 1)} disabled={ocupado}>
+              Continuar
+            </Button>
+          ) : (
+            <Button onClick={concluir} disabled={ocupado}>
+              {ocupado ? "Salvando..." : "Salvar e ir para o painel"}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -437,17 +572,15 @@ function Campo({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function EntradaReais({
-  label,
   centavos,
   onChange,
   estreito = false,
 }: {
-  label?: string;
   centavos: number;
   onChange: (centavos: number) => void;
   estreito?: boolean;
 }) {
-  const campo = (
+  return (
     <input
       type="number"
       min={0}
@@ -457,7 +590,7 @@ function EntradaReais({
       onChange={(e) =>
         onChange(Math.round((parseFloat(e.target.value) || 0) * 100))
       }
-      aria-label={label ?? "Valor em reais"}
+      aria-label="Valor em reais"
       className={
         estreito
           ? "h-12 w-28 rounded-xl border border-linha bg-superficie px-3 text-right text-corpo text-texto outline-none focus-visible:ring-2 focus-visible:ring-principal"
@@ -465,12 +598,31 @@ function EntradaReais({
       }
     />
   );
-  if (!label || estreito) return campo;
+}
+
+function EntradaPercentual({
+  valor,
+  onChange,
+  rotulo = "Percentual",
+}: {
+  valor: number;
+  onChange: (valor: number) => void;
+  rotulo?: string;
+}) {
   return (
-    <label className="block space-y-1.5">
-      <span className="block text-legenda font-medium text-texto">{label}</span>
-      {campo}
-    </label>
+    <div className="flex items-center gap-1">
+      <input
+        type="number"
+        min={0}
+        step="0.1"
+        inputMode="decimal"
+        value={valor}
+        onChange={(e) => onChange(Number(e.target.value) || 0)}
+        aria-label={rotulo}
+        className="h-11 w-16 rounded-xl border border-linha bg-superficie px-2 text-right text-corpo text-texto outline-none focus-visible:ring-2 focus-visible:ring-principal"
+      />
+      <span className="text-corpo text-texto-secundario">%</span>
+    </div>
   );
 }
 

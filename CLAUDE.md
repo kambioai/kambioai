@@ -159,22 +159,22 @@ Regras gerais:
 
 ## 5b. Cadastro e configuração inicial (onboarding do patrão)
 
-É a **função 1 do App do patrão** (PRD §"App do patrão" §1) e **destrava o resto do sistema**: cada passo precisa ser concluído para liberar o próximo. Acontece logo depois de assinar.
+É a **função 1 do App do patrão** (PRD §"App do patrão" §1) e **destrava o resto do sistema**. **Empresa, catálogo e custos/taxas são obrigatórios**; **só o estoque pode ser feito depois** (inclusive pelo funcionário — informar quantidade não revela custo). Acontece logo depois de assinar.
 
 1. **Conta**: nome, celular, e-mail, senha.
 2. **Empresa**: nome, cidade, **segmento** (oficina de moto, mecânica, funilaria, estética, troca de óleo, borracharia…).
 3. **Catálogo modelo do segmento**: o sistema carrega um catálogo pronto do segmento (serviços + peças comuns). O patrão **não começa do zero** — só ajusta custo e preço e apaga o que não usa. (O catálogo modelo é mantido pelo admin — ver §5 do Painel admin no PRD; carregado na criação da empresa, empresas existentes não são alteradas depois.)
-4. **Completar o catálogo** de 3 jeitos: digitando · **falando** ("pneu 90/90, paguei 100, vendo a 150, tenho 6") · **fotografando** a tabela de preços ou a nota do fornecedor (upload no Supabase Storage → IA monta os itens → patrão confirma).
-5. **Estoque**: quantidade atual e **mínimo** de cada produto (alimenta o alerta de reposição).
-6. **Custos fixos** (aluguel, funcionários, contador, luz, internet) e **taxas da maquininha** (débito, crédito, parcelado, Pix) — vão para `custos_fixos` e `taxas_pagamento`.
+4. **Completar o catálogo**: **digitando** (adicionar/editar itens na mão) agora; **falando** ("pneu 90/90, paguei 100, vendo a 150, tenho 6") a partir da Fase 8 (reusa o pipeline de voz). **Obrigatório.**
+5. **Estoque**: quantidade atual e **mínimo** de cada produto (alimenta o alerta de reposição). **Pode ser feito depois** — o patrão pula no onboarding e completa mais tarde; o funcionário pode fazer a contagem (não vê custo).
+6. **Custos fixos** (aluguel, funcionários, contador, luz, internet) e **taxas da maquininha**: débito e **crédito em até 12x** (um percentual por nº de parcelas); Pix e dinheiro sem taxa. Vão para `custos_fixos` e `taxas_pagamento`. **Obrigatório.**
 7. **Convidar funcionários** (opcional; dispara a lógica de plano/cobrança — ver §7).
 8. **Primeira venda**: sistema mostra a frase de exemplo e abre o botão Falar.
 
 Pontos de implementação:
 - Cada item de catálogo guarda **custo** e **preço de venda** desde o cadastro (o lucro é `preço − custo`, calculado no servidor).
 - **Despesas do dia a dia NÃO entram aqui** — são lançadas na operação (função 7 do patrão). No onboarding entram apenas **custos fixos mensais** e **taxas**.
-- O onboarding deve ter **estado de progresso** (quais passos faltam) para poder bloquear o uso pleno até estar completo.
-- Catálogo por voz/foto reusa o **mesmo pipeline de voz/IA** (próxima seção), com intenção de montar itens de catálogo em vez de OS.
+- O onboarding tem **estado de progresso** (`empresas.onboarding_completo`): a área do patrão só abre com empresa + catálogo + custos/taxas prontos. O **estoque é pulável** ("fazer depois") e não bloqueia.
+- Catálogo **por voz** reusa o **mesmo pipeline de voz/IA** (próxima seção), com intenção de montar itens de catálogo em vez de OS — entra na Fase 8.
 
 ---
 

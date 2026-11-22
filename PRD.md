@@ -124,14 +124,14 @@ O patrão vê e controla tudo da empresa. São 13 funções, na ordem em que ele
 
 ### 1. Cadastro e configuração inicial
 
-Deixa o sistema pronto pra primeira venda. Cada passo deve ser feito para liberar o resto do sistema
+Deixa o sistema pronto pra primeira venda. **Empresa, catálogo e custos/taxas são obrigatórios** no onboarding (sem eles o registro de venda não calcula certo). **Só o estoque pode ser feito depois** — inclusive por um funcionário, já que informar quantidade não revela custo.
 
 1. Cria a conta com nome, celular, e-mail e senha.&#32;
-2. Informa os dados da empresa: nome, cidade e segmento (oficina de moto, mecânica, funilaria, estética, troca de óleo, borracharia…).
-3. O sistema carrega um **catálogo modelo do segmento**, já com serviços e peças comuns. O patrão só ajusta custo e preço e apaga o que não usa.
-4. Completa o catálogo de três jeitos: digitando, falando ("pneu 90/90, paguei 100, vendo a 150, tenho 6") ou fotografando a tabela de preços ou a nota do fornecedor. A IA monta os itens e ele confirma.
-5. Informa o estoque atual e o mínimo de cada produto, para o alerta de reposição.
-6. Cadastra os custos fixos do mês (funcionários, aluguel, contador, luz, internet) e as taxas da maquininha (débito, crédito, parcelado, Pix).
+2. Informa os dados da empresa: nome, cidade e segmento (oficina de moto, mecânica, funilaria, estética, troca de óleo, borracharia…). **(obrigatório)**
+3. O sistema carrega um **catálogo modelo do segmento**, já com serviços e peças comuns. O patrão só ajusta custo e preço, apaga o que não usa e **adiciona** os itens que faltam. **(obrigatório)**
+4. Completa o catálogo **digitando** os itens (e, a partir da Fase 8, também **falando** — "pneu 90/90, paguei 100, vendo a 150, tenho 6" — com a IA montando e ele confirmando).
+5. Informa o estoque atual e o mínimo de cada produto, para o alerta de reposição. **(pode fazer depois; o funcionário pode completar a contagem)**
+6. Cadastra os custos fixos do mês (funcionários, aluguel, contador, luz, internet) e as taxas da maquininha (débito e crédito em até 12x, Pix e dinheiro sem taxa). **(obrigatório)**
 7. Convida funcionários, se tiver (função 11).
 8. O sistema mostra a frase de exemplo da primeira venda e abre o botão Falar.
 
@@ -446,7 +446,7 @@ O Kambio é escrito em **TypeScript** do início ao fim, em **Next.js** publicad
 | Serviço | Para quê | Variáveis de ambiente | Custo |
 | --- | --- | --- | --- |
 | Vercel Pro | Hospedar o app, rotas de servidor e tarefas agendadas (Vercel Cron) | — | Já pago |
-| Supabase | Banco, login (e-mail e senha), arquivos (fotos de tabelas e notas de fornecedor) | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Grátis no desenvolvimento; Pro US$ 25/mês a partir do 1º cliente |
+| Supabase | Banco, login (e-mail e senha) e armazenamento de arquivos | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Grátis no desenvolvimento; Pro US$ 25/mês a partir do 1º cliente |
 | Gemini 3.1 Flash-Lite (SDK `@google/genai`) | Ouvir o áudio e devolver a OS em JSON | `GEMINI_API_KEY` | \~US$ 0,002 por registro |
 | Stripe Billing | Assinaturas, funcionário adicional, portal do cliente, avisos de pagamento | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | 3,99% + R$ 0,39 por cobrança + 0,7% do Billing |
 | Resend | E-mails do sistema | `RESEND_API_KEY` | Plano gratuito no início |

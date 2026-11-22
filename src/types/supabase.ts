@@ -251,6 +251,7 @@ export type Database = {
           criado_em: string
           id: string
           nome: string
+          onboarding_completo: boolean
           plano: Database["public"]["Enums"]["plano"]
           segmento: Database["public"]["Enums"]["segmento"]
           status_assinatura: Database["public"]["Enums"]["status_assinatura"]
@@ -262,6 +263,7 @@ export type Database = {
           criado_em?: string
           id?: string
           nome: string
+          onboarding_completo?: boolean
           plano?: Database["public"]["Enums"]["plano"]
           segmento: Database["public"]["Enums"]["segmento"]
           status_assinatura?: Database["public"]["Enums"]["status_assinatura"]
@@ -273,6 +275,7 @@ export type Database = {
           criado_em?: string
           id?: string
           nome?: string
+          onboarding_completo?: boolean
           plano?: Database["public"]["Enums"]["plano"]
           segmento?: Database["public"]["Enums"]["segmento"]
           status_assinatura?: Database["public"]["Enums"]["status_assinatura"]
@@ -958,6 +961,14 @@ export type Database = {
       }
     }
     Functions: {
+      criar_empresa_onboarding: {
+        Args: {
+          p_cidade: string
+          p_nome: string
+          p_segmento: Database["public"]["Enums"]["segmento"]
+        }
+        Returns: string
+      }
       e_membro: { Args: { emp: string }; Returns: boolean }
       e_patrao: { Args: { emp: string }; Returns: boolean }
       empresas_do_usuario: { Args: never; Returns: string[] }

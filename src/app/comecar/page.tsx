@@ -1,20 +1,24 @@
+import { redirect } from "next/navigation";
+
 import { CascaAuth } from "@/components/auth/casca-auth";
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
-import {
-  listarCatalogoModelo,
-  listarCustosFixos,
-  listarTaxas,
-} from "@/lib/dados";
+import { criarClienteServidor } from "@/lib/supabase/server";
 
-// Onboarding do patrão (CLAUDE.md §5b): empresa → catálogo modelo → estoque →
-// custos e taxas → convidar → primeira venda, com barra de progresso.
-// Tudo fictício na Fase 4; a gravação real entra na Fase 7.
+// Onboarding real do patrão (CLAUDE.md §5b): cria a própria oficina e configura
+// catálogo/estoque/custos/taxas. Se já concluiu, vai direto pro painel.
 export default async function Comecar() {
-  const [catalogo, custos, taxas] = await Promise.all([
-    listarCatalogoModelo(),
-    listarCustosFixos(),
-    listarTaxas(),
-  ]);
+  const sb = await criarClienteServidor();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) redirect("/entrar");
+
+  const { data: emp } = await sb
+    .from("empresas")
+    .select("onboarding_completo")
+    .limit(1)
+    .maybeSingle();
+  if (emp?.onboarding_completo) redirect("/patrao/painel");
 
   return (
     <CascaAuth
@@ -22,11 +26,7 @@ export default async function Comecar() {
       subtitulo="Poucos passos e você já registra a primeira venda."
       largura="larga"
     >
-      <OnboardingWizard
-        catalogoInicial={catalogo}
-        custosIniciais={custos}
-        taxasIniciais={taxas}
-      />
+      <OnboardingWizard />
     </CascaAuth>
   );
 }

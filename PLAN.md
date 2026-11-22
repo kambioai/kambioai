@@ -170,6 +170,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
   - Os testes de isolamento e de funcionário-sem-custo passam.
 
 ## Fase 7 — Cadastro da empresa e onboarding real
+- **Status**: ✅ Concluída (22/11/2026) — mesclada na `main` e removida. Cadastro cria a própria oficina (empresa + patrão), onboarding real grava catálogo/estoque/custos/taxas, gating por `onboarding_completo`. Removida a foto (upload) do MVP. **Gestão manual do catálogo/estoque no app (adicionar/editar/excluir) foi antecipada da Fase 9.** Testes verdes (incl. "onboarding cria a própria oficina").
 - **Branch**: `fase-07-onboarding-real`
 - **Objetivo**: criar empresa e configurar o catálogo/estoque/custos de verdade.
 - **Fonte dos dados**: `real`.
@@ -205,7 +206,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 - **Itens**:
   - **OS e pátio** com fluxo de status (Orçamento → Em serviço → Pronto → Entregue; Cancelado; Aguardando peça); pagamento na entrega.
   - **Histórico por placa/cliente** real, com lembrete de retorno.
-  - **Estoque/catálogo**: compra por voz, atualização de custo, ajuste manual com motivo e autor.
+  - **Estoque/catálogo**: compra por voz, atualização de custo, ajuste manual com motivo e autor. *(Adicionar/editar/excluir item manualmente já foi feito na Fase 7; aqui entram a compra por voz e o registro em `movimentos_estoque` com motivo/autor.)*
   - **Despesas** (só patrão) por voz/manual com categoria.
   - **Painel** com cálculos reais: lucro do período, Contas do mês, alertas, ranking, gráfico.
   - **Fechamento do dia**: comparação por forma de pagamento, agrupado por autor, fechar o dia; depois só patrão altera.
@@ -296,7 +297,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 4 ✅ | `fase-04-front-onboarding` | Onboarding + login/convite | fictício |
 | 5 ✅ | `fase-05-front-admin` | Painel admin | fictício |
 | 6 ✅ | `fase-06-banco-rls` | Banco + RLS + views + login real | real |
-| 7 | `fase-07-onboarding-real` | Cadastro da empresa + catálogo real | real |
+| 7 ✅ | `fase-07-onboarding-real` | Cadastro da empresa + catálogo real | real |
 | 8 | `fase-08-voz` | Pipeline de voz + OS transacional | real |
 | 9 | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
 | 10 | `fase-10-equipe` | Convite + permissões do funcionário | real |

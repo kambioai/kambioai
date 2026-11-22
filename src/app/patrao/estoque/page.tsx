@@ -1,4 +1,4 @@
-import { EstoqueCatalogo } from "@/components/estoque-catalogo";
+import { GerenciarEstoque } from "@/components/estoque/gerenciar-estoque";
 import { listarCatalogo } from "@/lib/dados";
 
 export default async function Estoque() {
@@ -9,7 +9,11 @@ export default async function Estoque() {
       <h1 className="font-grotesk text-titulo font-bold text-principal">
         Estoque e catálogo
       </h1>
-      <EstoqueCatalogo itens={itens} />
+      <p className="text-corpo text-texto-secundario">
+        Adicione, edite ou remova itens a qualquer momento — tudo é salvo na
+        hora.
+      </p>
+      <GerenciarEstoque itens={itens} />
     </section>
   );
 }

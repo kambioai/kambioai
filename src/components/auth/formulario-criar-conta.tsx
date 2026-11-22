@@ -47,12 +47,10 @@ export function FormularioCriarConta() {
       );
       return;
     }
-    // Fase 6 (demo): entra na oficina de exemplo como patrão para já ver dados
-    // reais. Na Fase 7 isso vira o cadastro real da empresa + onboarding.
-    await supabase.rpc("entrar_como_patrao_demo");
-    // Recarregamento completo: leva o cookie de sessão junto, caindo direto no
-    // painel em vez de bater no login (middleware).
-    window.location.assign("/patrao/painel");
+    // Vai para o onboarding real: lá o patrão cria a PRÓPRIA oficina e configura
+    // catálogo, estoque, custos e taxas. Recarregamento completo leva o cookie
+    // de sessão junto (senão o middleware acha que ainda não há login).
+    window.location.assign("/comecar");
   }
 
   return (
