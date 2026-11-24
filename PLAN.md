@@ -216,6 +216,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
   - Um dia de operação completo roda fim a fim (abrir OS, atender, pagar, lançar despesa, conferir painel, fechar o caixa) com números corretos.
 
 ## Fase 10 — Equipe e permissões do funcionário
+- **Status**: ✅ Concluída (23/11/2026) — mesclada na `main` e removida. Convite por link (sem e-mail — Resend fica pra Fase 14): tabela `convites` + RLS só-patrão, rota `/api/convite/aceitar` (service role) cria o login e vincula o funcionário. `membros` ganhou `nome`/`email`; Equipe lista funcionários com nome real + OS no mês, convites pendentes (copiar/cancelar) e desativar/reativar. Permissões reais: `membroAtual()` + layouts roteiam por papel e **desativar corta o acesso na hora**; funcionário só corrige a **própria** OS (policy); "avisar falta" vira lembrete pro patrão. Migrações 0010 (equipe) e 0011 (grant da service role em `convites`) aplicadas em produção. Testes verdes (22; novo: convite isolado + sem custo + desativar corta acesso). *(Nota: corrigido o helper `limpar` dos testes — o trigger de auditoria no cascade estourava a FK e deixava oficinas órfãs; resíduo antigo limpo.)*
 - **Branch**: `fase-10-equipe`
 - **Objetivo**: convidar funcionário e aplicar as permissões de verdade.
 - **Fonte dos dados**: `real`.
@@ -302,7 +303,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 7 ✅ | `fase-07-onboarding-real` | Cadastro da empresa + catálogo real | real |
 | 8 ✅ | `fase-08-voz` | Pipeline de voz + OS transacional | real |
 | 9 ✅ | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
-| 10 | `fase-10-equipe` | Convite + permissões do funcionário | real |
+| 10 ✅ | `fase-10-equipe` | Convite + permissões do funcionário | real |
 | 11 | `fase-11-stripe` | Assinatura + régua de cobrança | real |
 | 12 | `fase-12-notificacoes` | Lembretes + push + crons | real |
 | 13 | `fase-13-admin-real` | Painel admin operando o SaaS | real |
