@@ -201,6 +201,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
   - Resposta ≤ 4 s; testes de cálculo e de schema passam.
 
 ## Fase 9 — Operação: OS, pátio, estoque, despesas, painel, fechamento
+- **Status**: ✅ Concluída (23/11/2026) — mesclada na `main` e removida. Fluxo de status da OS + entrega com pagamento (taxa no servidor), tela /patrao/os/[id], lançar despesa, fechar o caixa (diferenças por forma), movimento de estoque no ajuste manual. Sem migração nova. Operações verificadas ao vivo sob RLS. *(Backlog p/ revisão: despesa e compra de estoque por voz; lembrete de retorno → Fase 12.)*
 - **Branch**: `fase-09-operacao`
 - **Objetivo**: ligar o resto da operação do patrão aos dados reais.
 - **Fonte dos dados**: `real`.
@@ -300,7 +301,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 6 ✅ | `fase-06-banco-rls` | Banco + RLS + views + login real | real |
 | 7 ✅ | `fase-07-onboarding-real` | Cadastro da empresa + catálogo real | real |
 | 8 ✅ | `fase-08-voz` | Pipeline de voz + OS transacional | real |
-| 9 | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
+| 9 ✅ | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
 | 10 | `fase-10-equipe` | Convite + permissões do funcionário | real |
 | 11 | `fase-11-stripe` | Assinatura + régua de cobrança | real |
 | 12 | `fase-12-notificacoes` | Lembretes + push + crons | real |
