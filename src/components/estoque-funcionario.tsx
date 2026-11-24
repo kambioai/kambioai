@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Search } from "lucide-react";
+import { Check, Search } from "lucide-react";
 
-import { AvisoDesfazer } from "@/components/aviso-desfazer/aviso-desfazer";
 import { Button } from "@/components/ui/button";
 import { EstadoVazio } from "@/components/estado-vazio/estado-vazio";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
 import type { ItemCatalogoFuncionario } from "@/lib/dados";
+import { avisarFalta as avisarFaltaAcao } from "@/server/funcionario";
 import { cn } from "@/lib/utils";
 import type { TipoItem } from "@/types";
 
@@ -24,40 +24,22 @@ export function EstoqueFuncionario({
   const [aba, setAba] = useState<TipoItem>("produto");
   const [busca, setBusca] = useState("");
   const [avisados, setAvisados] = useState<Set<string>>(new Set());
-  const [ultimoAviso, setUltimoAviso] = useState<{
-    id: string;
-    nome: string;
-  } | null>(null);
+  const [ocupado, setOcupado] = useState<string | null>(null);
 
   const termo = busca.trim().toLowerCase();
   const lista = itens
     .filter((i) => i.tipo === aba)
     .filter((i) => i.nome.toLowerCase().includes(termo));
 
-  function avisarFalta(id: string, nome: string) {
-    setAvisados((s) => new Set(s).add(id));
-    setUltimoAviso({ id, nome });
-  }
-
-  function desfazer(id: string) {
-    setAvisados((s) => {
-      const novo = new Set(s);
-      novo.delete(id);
-      return novo;
-    });
-    setUltimoAviso(null);
+  async function avisarFalta(id: string, nome: string) {
+    setOcupado(id);
+    const r = await avisarFaltaAcao({ nome });
+    setOcupado(null);
+    if (r.ok) setAvisados((s) => new Set(s).add(id));
   }
 
   return (
     <div className="space-y-4">
-      {ultimoAviso ? (
-        <AvisoDesfazer
-          mensagem={`Falta de "${ultimoAviso.nome}" avisada ao patrão.`}
-          aoDesfazer={() => desfazer(ultimoAviso.id)}
-          aoFechar={() => setUltimoAviso(null)}
-        />
-      ) : null}
-
       <div className="flex gap-2" role="tablist" aria-label="Tipo de item">
         <Aba ativa={aba === "produto"} onClick={() => setAba("produto")}>
           Produtos
@@ -93,6 +75,7 @@ export function EstoqueFuncionario({
               key={item.id}
               item={item}
               avisado={avisados.has(item.id)}
+              ocupado={ocupado === item.id}
               onAvisar={() => avisarFalta(item.id, item.nome)}
             />
           ))}
@@ -105,10 +88,12 @@ export function EstoqueFuncionario({
 function ItemLinha({
   item,
   avisado,
+  ocupado,
   onAvisar,
 }: {
   item: ItemCatalogoFuncionario;
   avisado: boolean;
+  ocupado: boolean;
   onAvisar: () => void;
 }) {
   const baixo = item.tipo === "produto" && item.estoque <= item.estoqueMinimo;
@@ -142,12 +127,18 @@ function ItemLinha({
         </div>
         {item.tipo === "produto" ? (
           avisado ? (
-            <span className="text-legenda font-medium text-confirmado">
+            <span className="inline-flex items-center gap-1 text-legenda font-medium text-confirmado">
+              <Check className="h-4 w-4" aria-hidden="true" />
               Falta avisada
             </span>
           ) : (
-            <Button variant="secundario" size="sm" onClick={onAvisar}>
-              Avisar falta
+            <Button
+              variant="secundario"
+              size="sm"
+              onClick={onAvisar}
+              disabled={ocupado}
+            >
+              {ocupado ? "Avisando..." : "Avisar falta"}
             </Button>
           )
         ) : null}

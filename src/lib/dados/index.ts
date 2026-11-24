@@ -13,7 +13,6 @@ import {
   catalogoMock,
   custosFixosMock,
   type CustoFixoMock,
-  type FuncionarioMock,
   type ItemCatalogoMock,
   type ItemOrdemMock,
   type OrdemMock,
@@ -46,6 +45,18 @@ function diasDesde(iso: string): number {
   const diaDe = Date.parse(fmt.format(new Date(iso)));
   const hoje = Date.parse(fmt.format(new Date()));
   return Math.round((hoje - diaDe) / 86_400_000);
+}
+
+/** Primeiro dia do mês corrente (fuso America/Sao_Paulo) em ISO, para filtros. */
+function primeiroDiaDoMesISO(): string {
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+  const ano = partes.find((p) => p.type === "year")?.value;
+  const mes = partes.find((p) => p.type === "month")?.value;
+  return `${ano}-${mes}-01T00:00:00-03:00`;
 }
 
 function dentroDoPeriodo(diasAtras: number, periodo: Periodo): boolean {
@@ -161,18 +172,61 @@ export async function listarOrdensAbertas(): Promise<OrdemMock[]> {
   return ((data ?? []) as unknown as LinhaOS[]).map(paraOrdem);
 }
 
-export async function listarFuncionarios(): Promise<FuncionarioMock[]> {
+export interface FuncionarioResumo {
+  id: string;
+  nome: string;
+  ativo: boolean;
+  osNoMes: number;
+}
+
+export async function listarFuncionarios(): Promise<FuncionarioResumo[]> {
   const sb = await criarClienteServidor();
-  // Nome do funcionário vem da tabela de perfis na Fase 10; por ora, só a lista.
-  const { data } = await sb
+  const { data: membros } = await sb
     .from("membros")
-    .select("id, ativo")
-    .eq("papel", "funcionario");
-  return (data ?? []).map((m) => ({
+    .select("id, usuario_id, nome, ativo")
+    .eq("papel", "funcionario")
+    .order("criado_em");
+
+  // OS do mês por funcionário (lançamentos por funcionário — CLAUDE.md §10/§11).
+  // Uma consulta só e agrupa em memória (sem N+1).
+  const inicioMes = primeiroDiaDoMesISO();
+  const { data: oss } = await sb
+    .from("ordens_servico")
+    .select("autor_id, status")
+    .gte("criado_em", inicioMes);
+  const contagem = new Map<string, number>();
+  for (const o of oss ?? []) {
+    if (!o.autor_id || o.status === "cancelado") continue;
+    contagem.set(o.autor_id, (contagem.get(o.autor_id) ?? 0) + 1);
+  }
+
+  return (membros ?? []).map((m) => ({
     id: m.id,
-    nome: AUTOR,
+    nome: m.nome ?? "Funcionário",
     ativo: m.ativo,
-    osNoMes: 0,
+    osNoMes: m.usuario_id ? (contagem.get(m.usuario_id) ?? 0) : 0,
+  }));
+}
+
+export interface ConvitePendente {
+  id: string;
+  nome: string;
+  token: string;
+  expiraEm: string;
+}
+
+export async function listarConvitesPendentes(): Promise<ConvitePendente[]> {
+  const sb = await criarClienteServidor();
+  const { data } = await sb
+    .from("convites")
+    .select("id, nome, token, expira_em")
+    .eq("usado", false)
+    .order("criado_em", { ascending: false });
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    nome: c.nome,
+    token: c.token,
+    expiraEm: c.expira_em,
   }));
 }
 
