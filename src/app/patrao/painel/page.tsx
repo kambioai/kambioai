@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Car, Package, TriangleAlert } from "lucide-react";
 
 import { BuscaPlaca } from "@/components/busca-placa";
+import { DespesaRapida } from "@/components/despesa-rapida";
 import { FiltrosPeriodo } from "@/components/filtros-periodo";
 import { GraficoLucro } from "@/components/grafico-lucro";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
@@ -150,6 +151,9 @@ export default async function Painel({
         )}
       </div>
 
+      {/* Lançar despesa */}
+      <DespesaRapida />
+
       {/* Pátio */}
       <div className="space-y-2">
         <h2 className="font-grotesk text-titulo font-bold text-principal">
@@ -164,21 +168,23 @@ export default async function Painel({
         ) : (
           <ul className="space-y-2">
             {abertas.map((os) => (
-              <li
-                key={os.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-linha bg-superficie px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-texto">
-                    {os.placa} · {os.modelo}
-                  </p>
-                  <p className="text-legenda text-texto-secundario">
-                    Registrado por {os.autor}
-                  </p>
-                </div>
-                <span className="shrink-0 rounded-full bg-fundo px-3 py-1 text-legenda font-medium text-principal">
-                  {rotuloStatus[os.status]}
-                </span>
+              <li key={os.id}>
+                <Link
+                  href={`/patrao/os/${os.id}`}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-linha bg-superficie px-4 py-3 outline-none hover:border-principal focus-visible:ring-2 focus-visible:ring-principal"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-texto">
+                      {os.placa} · {os.modelo}
+                    </p>
+                    <p className="text-legenda text-texto-secundario">
+                      {os.itens.map((i) => i.nome).join(" · ") || "Sem itens"}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-fundo px-3 py-1 text-legenda font-medium text-principal">
+                    {rotuloStatus[os.status]}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
@@ -213,26 +219,28 @@ export default async function Painel({
         </h2>
         <ul className="divide-y divide-linha overflow-hidden rounded-2xl border border-linha bg-superficie">
           {ordens.map((os) => (
-            <li
-              key={os.id}
-              className="flex items-center justify-between gap-3 px-4 py-3"
-            >
-              <div className="min-w-0">
-                <p className="truncate font-medium text-texto">
-                  {os.placa} · {os.modelo}
-                </p>
-                <p className="text-legenda text-texto-secundario">
-                  {rotuloStatus[os.status]}
-                </p>
-              </div>
-              {os.totalCentavos > 0 ? (
-                <ValorReais
-                  centavos={os.totalCentavos}
-                  className="text-principal"
-                />
-              ) : (
-                <span className="text-legenda text-texto-secundario">—</span>
-              )}
+            <li key={os.id}>
+              <Link
+                href={`/patrao/os/${os.id}`}
+                className="flex items-center justify-between gap-3 px-4 py-3 outline-none hover:bg-fundo focus-visible:bg-fundo"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-texto">
+                    {os.placa} · {os.modelo}
+                  </p>
+                  <p className="text-legenda text-texto-secundario">
+                    {rotuloStatus[os.status]}
+                  </p>
+                </div>
+                {os.totalCentavos > 0 ? (
+                  <ValorReais
+                    centavos={os.totalCentavos}
+                    className="text-principal"
+                  />
+                ) : (
+                  <span className="text-legenda text-texto-secundario">—</span>
+                )}
+              </Link>
             </li>
           ))}
         </ul>

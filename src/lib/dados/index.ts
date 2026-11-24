@@ -529,6 +529,18 @@ export async function listarOrdensDoVeiculo(
   return ((data ?? []) as unknown as LinhaOS[]).map(paraOrdem);
 }
 
+/** Uma OS pelo id (tela de detalhe do patrão). */
+export async function buscarOrdem(id: string): Promise<OrdemMock | null> {
+  const sb = await criarClienteServidor();
+  const { data } = await sb
+    .from("ordens_servico")
+    .select(SELECT_OS)
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) return null;
+  return paraOrdem(data as unknown as LinhaOS);
+}
+
 // ===== Visões do FUNCIONÁRIO (sem dinheiro) =====
 //
 // O funcionário nunca lê custo, custo_total, taxa nem lucro (CLAUDE.md §4 e §11).

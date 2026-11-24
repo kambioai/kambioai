@@ -1,6 +1,5 @@
 import { FechamentoForm } from "@/components/fechamento-form";
 import { EstadoVazio } from "@/components/estado-vazio/estado-vazio";
-import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
 import { lerFechamentoHoje } from "@/lib/dados";
@@ -57,10 +56,6 @@ export default async function Fechamento() {
           ))}
         </ul>
       </Cartao>
-
-      <Button variant="principal" className="w-full">
-        Fechar o caixa
-      </Button>
     </section>
   );
 }

@@ -58,7 +58,16 @@ export async function atualizarItem(
 
   const sb = await criarClienteServidor();
   const d = parsed.data;
+
+  // Estoque anterior, para registrar o movimento de ajuste (motivo + autor).
+  const { data: antes } = await sb
+    .from("catalogo_itens")
+    .select("estoque, empresa_id")
+    .eq("id", d.id)
+    .maybeSingle();
+
   // A RLS garante que só dá para alterar item da própria oficina (só-patrão).
+  const novoEstoque = d.tipo === "servico" ? 0 : d.estoque;
   const { error } = await sb
     .from("catalogo_itens")
     .update({
@@ -66,11 +75,25 @@ export async function atualizarItem(
       tipo: d.tipo,
       custo: d.tipo === "servico" ? 0 : d.custoCentavos,
       preco: d.precoCentavos,
-      estoque: d.tipo === "servico" ? 0 : d.estoque,
+      estoque: novoEstoque,
       estoque_minimo: d.tipo === "servico" ? 0 : d.estoqueMinimo,
     })
     .eq("id", d.id);
   if (error) return { ok: false, erro: "Não consegui salvar o item." };
+
+  // Movimento de estoque quando a quantidade muda no ajuste manual.
+  if (antes && novoEstoque !== antes.estoque) {
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+    await sb.from("movimentos_estoque").insert({
+      item_id: d.id,
+      quantidade: novoEstoque - antes.estoque,
+      motivo: "ajuste",
+      autor_id: user?.id ?? null,
+      empresa_id: antes.empresa_id,
+    });
+  }
   return { ok: true };
 }
 

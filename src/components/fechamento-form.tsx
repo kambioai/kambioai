@@ -1,33 +1,60 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
 import type { LinhaFechamento } from "@/lib/dados";
 import { rotuloPagamento } from "@/lib/rotulos";
+import { fecharCaixa } from "@/server/operacao";
+import type { FormaPagamento } from "@/types";
 import { cn } from "@/lib/utils";
 
 /**
- * Conferência do caixa por forma de pagamento. O patrão digita quanto contou
- * e a tela mostra Bateu / Sobrou / Faltam comparando com o sistema.
+ * Conferência do caixa por forma de pagamento. O patrão digita quanto contou,
+ * a tela mostra Bateu / Sobrou / Faltam, e "Fechar o caixa" grava o fechamento.
  */
 export function FechamentoForm({ linhas }: { linhas: LinhaFechamento[] }) {
+  const router = useRouter();
   const [informados, setInformados] = useState<Record<string, string>>({});
+  const [salvando, setSalvando] = useState(false);
+  const [salvo, setSalvo] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  function centavosDe(forma: string): number | null {
+    const texto = informados[forma];
+    if (!texto || texto.trim() === "") return null;
+    const n = Math.round(Number(texto.replace(",", ".")) * 100);
+    return Number.isNaN(n) ? null : n;
+  }
+
+  async function fechar() {
+    setSalvando(true);
+    setErro(null);
+    const valores: Partial<Record<FormaPagamento, number>> = {};
+    for (const linha of linhas) {
+      const c = centavosDe(linha.forma);
+      if (c !== null) valores[linha.forma] = c;
+    }
+    const r = await fecharCaixa({ valores });
+    setSalvando(false);
+    if (!r.ok) {
+      setErro(r.erro);
+      return;
+    }
+    setSalvo(true);
+    router.refresh();
+  }
 
   return (
     <div className="space-y-3">
       {linhas.map((linha) => {
-        const texto = informados[linha.forma] ?? "";
-        const informadoCentavos =
-          texto.trim() === ""
-            ? null
-            : Math.round(Number(texto.replace(",", ".")) * 100);
-        const valido =
-          informadoCentavos !== null && !Number.isNaN(informadoCentavos);
+        const informadoCentavos = centavosDe(linha.forma);
+        const valido = informadoCentavos !== null;
         const diferenca = valido
           ? informadoCentavos - linha.sistemaCentavos
           : 0;
-
         return (
           <div
             key={linha.forma}
@@ -48,7 +75,7 @@ export function FechamentoForm({ linhas }: { linhas: LinhaFechamento[] }) {
                 </span>
                 <input
                   inputMode="decimal"
-                  value={texto}
+                  value={informados[linha.forma] ?? ""}
                   onChange={(e) =>
                     setInformados((prev) => ({
                       ...prev,
@@ -65,6 +92,23 @@ export function FechamentoForm({ linhas }: { linhas: LinhaFechamento[] }) {
           </div>
         );
       })}
+
+      {erro ? (
+        <p className="rounded-xl bg-erro-fundo px-3 py-2 text-legenda text-erro">
+          {erro}
+        </p>
+      ) : null}
+
+      {salvo ? (
+        <p className="rounded-xl bg-confirmado/10 px-3 py-2 text-corpo font-medium text-confirmado">
+          Caixa fechado! A partir de agora, só o patrão altera lançamentos de
+          hoje.
+        </p>
+      ) : (
+        <Button className="w-full" onClick={fechar} disabled={salvando}>
+          {salvando ? "Fechando..." : "Fechar o caixa"}
+        </Button>
+      )}
     </div>
   );
 }
