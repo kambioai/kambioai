@@ -168,6 +168,59 @@ export type Database = {
           },
         ]
       }
+      convites: {
+        Row: {
+          criado_em: string
+          criado_por: string | null
+          email: string | null
+          empresa_id: string
+          expira_em: string
+          id: string
+          nome: string
+          papel: Database["public"]["Enums"]["papel"]
+          token: string
+          usado: boolean
+          usado_em: string | null
+          usado_por: string | null
+        }
+        Insert: {
+          criado_em?: string
+          criado_por?: string | null
+          email?: string | null
+          empresa_id: string
+          expira_em?: string
+          id?: string
+          nome: string
+          papel?: Database["public"]["Enums"]["papel"]
+          token: string
+          usado?: boolean
+          usado_em?: string | null
+          usado_por?: string | null
+        }
+        Update: {
+          criado_em?: string
+          criado_por?: string | null
+          email?: string | null
+          empresa_id?: string
+          expira_em?: string
+          id?: string
+          nome?: string
+          papel?: Database["public"]["Enums"]["papel"]
+          token?: string
+          usado?: boolean
+          usado_em?: string | null
+          usado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convites_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custos_fixos: {
         Row: {
           atualizado_em: string
@@ -371,8 +424,10 @@ export type Database = {
           ativo: boolean
           atualizado_em: string
           criado_em: string
+          email: string | null
           empresa_id: string
           id: string
+          nome: string | null
           papel: Database["public"]["Enums"]["papel"]
           usuario_id: string
         }
@@ -380,8 +435,10 @@ export type Database = {
           ativo?: boolean
           atualizado_em?: string
           criado_em?: string
+          email?: string | null
           empresa_id: string
           id?: string
+          nome?: string | null
           papel: Database["public"]["Enums"]["papel"]
           usuario_id: string
         }
@@ -389,8 +446,10 @@ export type Database = {
           ativo?: boolean
           atualizado_em?: string
           criado_em?: string
+          email?: string | null
           empresa_id?: string
           id?: string
+          nome?: string | null
           papel?: Database["public"]["Enums"]["papel"]
           usuario_id?: string
         }

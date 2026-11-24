@@ -1,18 +1,24 @@
+import Link from "next/link";
+
 import { CascaAuth } from "@/components/auth/casca-auth";
-import { FormularioConvite } from "@/components/auth/formulario-convite";
-import { lerDadosConta } from "@/lib/dados";
 
-// Aceitar convite: o funcionário chega por um link, vê pra qual oficina foi
-// convidado e cria a senha. (Fictício — o convite real entra na Fase 10.)
-export default async function Convite() {
-  const { empresa } = await lerDadosConta();
-
+// Convite sem token no link: não dá pra saber de qual oficina é. Orienta a
+// pessoa. O fluxo real de aceitar convite fica em /convite/[token] (Fase 10).
+export default function ConviteSemToken() {
   return (
     <CascaAuth
-      titulo="Você foi convidado"
-      subtitulo={`Entre na equipe da ${empresa.nome} como funcionário. Crie sua senha pra começar.`}
+      titulo="Convite indisponível"
+      subtitulo="Abra o link completo que o patrão te enviou. Se você já tem conta, é só entrar."
+      rodape={
+        <Link
+          href="/entrar"
+          className="font-medium text-principal hover:underline"
+        >
+          Ir para o login
+        </Link>
+      }
     >
-      <FormularioConvite />
+      <div />
     </CascaAuth>
   );
 }

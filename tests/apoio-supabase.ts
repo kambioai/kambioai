@@ -92,9 +92,22 @@ export async function criarEmpresaComUsuario(opts: {
   return { empresaId: emp.id, userId: id, itemId: item.id, sb };
 }
 
-/** Remove empresas (cascata apaga catálogo/membros) e usuários criados. */
+/**
+ * Remove empresas e usuários criados no teste. Precisa apagar PRIMEIRO as
+ * tabelas com trigger de auditoria (catálogo, OS, despesas): o cascade do
+ * delete da empresa dispararia o trigger, que tentaria inserir em `auditoria`
+ * referenciando a empresa já em remoção — e aí a FK estoura. Apagando essas
+ * tabelas antes (com a empresa ainda viva) e zerando a auditoria, o delete da
+ * empresa flui pelo cascade (membros, convites, veículos etc.).
+ */
 export async function limpar(empresaIds: string[], userIds: string[]) {
   const a = admin();
-  for (const id of empresaIds) await a.from("empresas").delete().eq("id", id);
+  for (const id of empresaIds) {
+    await a.from("catalogo_itens").delete().eq("empresa_id", id);
+    await a.from("ordens_servico").delete().eq("empresa_id", id);
+    await a.from("despesas").delete().eq("empresa_id", id);
+    await a.from("auditoria").delete().eq("empresa_id", id);
+    await a.from("empresas").delete().eq("id", id);
+  }
   for (const id of userIds) await a.auth.admin.deleteUser(id);
 }

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { CascaAuth } from "@/components/auth/casca-auth";
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
+import { membroAtual } from "@/lib/permissoes";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Onboarding real do patrão (CLAUDE.md §5b): cria a própria oficina e configura
@@ -12,6 +13,10 @@ export default async function Comecar() {
     data: { user },
   } = await sb.auth.getUser();
   if (!user) redirect("/entrar");
+
+  // Funcionário não configura oficina: vai direto pro Pátio.
+  const membro = await membroAtual();
+  if (membro?.papel === "funcionario") redirect("/funcionario/patio");
 
   const { data: emp } = await sb
     .from("empresas")
