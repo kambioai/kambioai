@@ -21,6 +21,9 @@ next-env.d.ts
 .vercel
 .supabase
 
+# CLI do Stripe (binário baixado para teste local)
+stripe.exe
+
 # sistema operacional / editor
 .DS_Store
 *.pem

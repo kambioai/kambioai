@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 
 import { z } from "zod";
 
+import { sincronizarAssinaturaFuncionarios } from "@/server/assinatura";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Escrita da equipe (CLAUDE.md §3, §11): tudo no SERVIDOR, sob RLS. As policies
@@ -86,11 +87,18 @@ export async function definirAtivoFuncionario(
   const sb = await criarClienteServidor();
   // A RLS só deixa o patrão alterar `membros` da própria empresa; e a policy
   // impede mexer em quem é patrão (papel = funcionario no filtro).
-  const { error } = await sb
+  const { data: atualizado, error } = await sb
     .from("membros")
     .update({ ativo })
     .eq("id", membroId)
-    .eq("papel", "funcionario");
+    .eq("papel", "funcionario")
+    .select("empresa_id")
+    .maybeSingle();
   if (error) return { ok: false, erro: "Não consegui atualizar o funcionário." };
+
+  // Ativar/desativar muda a conta da assinatura (Básico↔PRO e adicionais).
+  if (atualizado?.empresa_id) {
+    await sincronizarAssinaturaFuncionarios(atualizado.empresa_id);
+  }
   return { ok: true };
 }

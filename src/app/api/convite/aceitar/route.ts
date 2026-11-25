@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { sincronizarAssinaturaFuncionarios } from "@/server/assinatura";
 import { criarClienteServico } from "@/lib/supabase/service";
 
 // Aceitar convite (Fase 10). Quem aceita ainda NÃO é membro de nenhuma empresa,
@@ -99,6 +100,9 @@ export async function POST(req: Request) {
     .from("convites")
     .update({ usado: true, usado_por: usuarioId, usado_em: new Date().toISOString() })
     .eq("id", convite.id);
+
+  // 5) Mais um funcionário ativo → ajusta a assinatura (Básico→PRO/adicionais).
+  await sincronizarAssinaturaFuncionarios(convite.empresa_id);
 
   return NextResponse.json({ ok: true });
 }
