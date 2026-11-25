@@ -1,8 +1,27 @@
+import {
+  BotaoAssinar,
+  BotaoPortal,
+} from "@/components/assinatura/botoes-assinatura";
 import { BotaoSair } from "@/components/auth/botao-sair";
 import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
-import { lerDadosConta } from "@/lib/dados";
+import { lerAssinatura, lerDadosConta } from "@/lib/dados";
+import type { StatusAssinatura } from "@/lib/stripe/acesso";
+
+const ASSINATURA_ROTULO: Record<
+  StatusAssinatura,
+  { texto: string; classe: string }
+> = {
+  ativa: { texto: "Ativa", classe: "bg-confirmado/10 text-confirmado" },
+  teste: { texto: "Em teste", classe: "bg-fundo text-texto-secundario" },
+  inadimplente: {
+    texto: "Pagamento pendente",
+    classe: "bg-atencao-fundo text-atencao",
+  },
+  bloqueada: { texto: "Bloqueada", classe: "bg-erro-fundo text-erro" },
+  cancelada: { texto: "Cancelada", classe: "bg-fundo text-texto-secundario" },
+};
 
 const ROTULO_SEGMENTO: Record<string, string> = {
   oficina_moto: "Oficina de moto",
@@ -20,7 +39,11 @@ function diasLabel(dias: number): string {
 }
 
 export default async function Conta() {
-  const { empresa, alteracoes } = await lerDadosConta();
+  const [{ empresa, alteracoes }, assinatura] = await Promise.all([
+    lerDadosConta(),
+    lerAssinatura(),
+  ]);
+  const badge = ASSINATURA_ROTULO[assinatura.status];
 
   return (
     <section className="space-y-5">
@@ -33,26 +56,27 @@ export default async function Conta() {
         <div className="mt-1 flex items-center justify-between gap-3">
           <div>
             <p className="font-grotesk text-titulo font-bold text-principal">
-              Kambio {empresa.plano}
+              Kambio {assinatura.plano}
             </p>
-            <p className="text-legenda text-texto-secundario">
-              Próxima cobrança em {empresa.proximaCobranca}
+            <p className="mt-1 text-corpo text-texto-secundario">
+              <ValorReais
+                centavos={assinatura.valorCentavos}
+                className="text-texto"
+              />
+              /mês
             </p>
           </div>
-          <span className="rounded-full bg-confirmado/10 px-3 py-1 text-legenda font-medium text-confirmado">
-            Ativa
+          <span
+            className={`rounded-full px-3 py-1 text-legenda font-medium ${badge.classe}`}
+          >
+            {badge.texto}
           </span>
         </div>
-        <p className="mt-2 text-corpo text-texto-secundario">
-          <ValorReais
-            centavos={empresa.valorPlanoCentavos}
-            className="text-texto"
-          />
-          /mês
-        </p>
-        <Button variant="secundario" className="mt-3 w-full">
-          Gerenciar assinatura
-        </Button>
+        {assinatura.jaAssinou ? (
+          <BotaoPortal className="mt-3" />
+        ) : (
+          <BotaoAssinar className="mt-3">Assinar o Kambio</BotaoAssinar>
+        )}
       </Cartao>
 
       <Cartao>

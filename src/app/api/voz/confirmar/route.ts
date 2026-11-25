@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { garantirEscrita } from "@/lib/permissoes";
 import { placaValida, normalizarPlaca } from "@/lib/placa";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import { carregarContexto, intentSchema, processar } from "@/server/voz-core";
@@ -10,6 +11,11 @@ export async function POST(req: Request) {
   const ctx = await carregarContexto();
   if (!ctx) {
     return NextResponse.json({ erro: "Não autenticado." }, { status: 401 });
+  }
+
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) {
+    return NextResponse.json({ erro: bloqueio.erro }, { status: 402 });
   }
 
   const corpo = await req.json().catch(() => null);

@@ -102,8 +102,8 @@ export default function EscolherPlano() {
       </div>
 
       <p className="mt-5 text-center text-legenda text-texto-secundario">
-        A assinatura é no cartão. Pagamento de verdade entra na Fase 11 — aqui é
-        só pra você ver o fluxo.
+        A assinatura é no cartão. Você começa configurando a oficina e assina
+        quando quiser, pela tela Conta.
       </p>
     </CascaAuth>
   );

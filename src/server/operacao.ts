@@ -6,6 +6,7 @@ import {
   buscarPercentualTaxa,
   type TaxaCalculo,
 } from "@/lib/dinheiro/calculo";
+import { garantirEscrita } from "@/lib/permissoes";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Escrita da operação (CLAUDE.md §3): tudo no SERVIDOR, sob RLS, validado.
@@ -43,6 +44,9 @@ export async function mudarStatusOS(
   if (!statusSchema.safeParse(status).success)
     return { ok: false, erro: "Status inválido." };
 
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) return bloqueio;
+
   const sb = await criarClienteServidor();
   const { error } = await sb
     .from("ordens_servico")
@@ -64,6 +68,8 @@ export async function entregarOS(
 ): Promise<Resultado> {
   const parsed = entregaSchema.safeParse(entrada);
   if (!parsed.success) return { ok: false, erro: "Dados inválidos." };
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) return bloqueio;
   const { osId, forma, parcelas } = parsed.data;
 
   const sb = await criarClienteServidor();
@@ -115,6 +121,8 @@ export async function registrarDespesa(
 ): Promise<Resultado> {
   const parsed = despesaSchema.safeParse(entrada);
   if (!parsed.success) return { ok: false, erro: "Dados inválidos." };
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) return bloqueio;
 
   const sb = await criarClienteServidor();
   const empresaId = await empresaDoUsuario(sb);
@@ -151,6 +159,8 @@ export async function fecharCaixa(
 ): Promise<Resultado> {
   const parsed = fechamentoSchema.safeParse(entrada);
   if (!parsed.success) return { ok: false, erro: "Dados inválidos." };
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) return bloqueio;
 
   const sb = await criarClienteServidor();
   const empresaId = await empresaDoUsuario(sb);

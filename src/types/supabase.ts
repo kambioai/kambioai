@@ -303,36 +303,42 @@ export type Database = {
           cidade: string | null
           criado_em: string
           id: string
+          inadimplente_desde: string | null
           nome: string
           onboarding_completo: boolean
           plano: Database["public"]["Enums"]["plano"]
           segmento: Database["public"]["Enums"]["segmento"]
           status_assinatura: Database["public"]["Enums"]["status_assinatura"]
           stripe_customer_id: string | null
+          stripe_subscription_id: string | null
         }
         Insert: {
           atualizado_em?: string
           cidade?: string | null
           criado_em?: string
           id?: string
+          inadimplente_desde?: string | null
           nome: string
           onboarding_completo?: boolean
           plano?: Database["public"]["Enums"]["plano"]
           segmento: Database["public"]["Enums"]["segmento"]
           status_assinatura?: Database["public"]["Enums"]["status_assinatura"]
           stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
         }
         Update: {
           atualizado_em?: string
           cidade?: string | null
           criado_em?: string
           id?: string
+          inadimplente_desde?: string | null
           nome?: string
           onboarding_completo?: boolean
           plano?: Database["public"]["Enums"]["plano"]
           segmento?: Database["public"]["Enums"]["segmento"]
           status_assinatura?: Database["public"]["Enums"]["status_assinatura"]
           stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
         }
         Relationships: []
       }

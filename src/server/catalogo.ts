@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import { garantirEscrita } from "@/lib/permissoes";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Gestão do catálogo/estoque no app (parte da Fase 9, trazida para a Fase 7).
@@ -27,6 +28,8 @@ type Resultado = { ok: true } | { ok: false; erro: string };
 export async function adicionarItem(entrada: EntradaItem): Promise<Resultado> {
   const parsed = itemSchema.safeParse(entrada);
   if (!parsed.success) return { ok: false, erro: "Dados do item inválidos." };
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) return bloqueio;
 
   const sb = await criarClienteServidor();
   const { data: emp } = await sb
@@ -55,6 +58,8 @@ export async function atualizarItem(
 ): Promise<Resultado> {
   const parsed = atualizarSchema.safeParse(entrada);
   if (!parsed.success) return { ok: false, erro: "Dados do item inválidos." };
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) return bloqueio;
 
   const sb = await criarClienteServidor();
   const d = parsed.data;
@@ -101,6 +106,8 @@ export async function removerItem(id: string): Promise<Resultado> {
   if (!z.string().uuid().safeParse(id).success) {
     return { ok: false, erro: "Item inválido." };
   }
+  const bloqueio = await garantirEscrita();
+  if (!bloqueio.ok) return bloqueio;
   const sb = await criarClienteServidor();
   const { error } = await sb.from("catalogo_itens").delete().eq("id", id);
   if (error) return { ok: false, erro: "Não consegui excluir o item." };

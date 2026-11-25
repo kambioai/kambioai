@@ -19,6 +19,7 @@ import {
   type TaxaMock,
   type VeiculoMock,
 } from "@/lib/mock";
+import type { StatusAssinatura } from "@/lib/stripe/acesso";
 import type { FormaPagamento, Segmento, StatusOS, TipoItem } from "@/types";
 
 // Nome de autor ainda não resolvido (vem com a tabela de perfis na Fase 10).
@@ -489,6 +490,30 @@ export interface AlteracaoView {
 export interface DadosConta {
   empresa: EmpresaConta;
   alteracoes: AlteracaoView[];
+}
+
+export interface AssinaturaInfo {
+  plano: "Básico" | "PRO";
+  status: StatusAssinatura;
+  jaAssinou: boolean;
+  valorCentavos: number;
+}
+
+/** Estado da assinatura da empresa para a tela Conta. */
+export async function lerAssinatura(): Promise<AssinaturaInfo> {
+  const sb = await criarClienteServidor();
+  const { data } = await sb
+    .from("empresas")
+    .select("plano, status_assinatura, stripe_subscription_id")
+    .limit(1)
+    .maybeSingle();
+  const pro = data?.plano === "pro";
+  return {
+    plano: pro ? "PRO" : "Básico",
+    status: (data?.status_assinatura ?? "teste") as StatusAssinatura,
+    jaAssinou: Boolean(data?.stripe_subscription_id),
+    valorCentavos: pro ? 17990 : 12990,
+  };
 }
 
 const ROTULO_TABELA: Record<string, string> = {
