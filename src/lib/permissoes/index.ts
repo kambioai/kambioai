@@ -36,6 +36,36 @@ export async function membroAtual(): Promise<MembroAtual | null> {
   return { empresaId: data.empresa_id, papel: data.papel, nome: data.nome };
 }
 
+/**
+ * Admin do SaaS (CLAUDE.md §1/§11). Lê a PRÓPRIA linha em `admins` (policy
+ * `admins_self`). O painel admin é gated por isto; os dados de várias empresas
+ * só são lidos depois, com a service role, atrás desta checagem.
+ */
+export interface AdminAtual {
+  id: string;
+  nome: string | null;
+}
+
+export async function adminAtual(): Promise<AdminAtual | null> {
+  const sb = await criarClienteServidor();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await sb
+    .from("admins")
+    .select("usuario_id, nome")
+    .eq("usuario_id", user.id)
+    .maybeSingle();
+  if (!data) return null;
+  return { id: data.usuario_id, nome: data.nome };
+}
+
+export async function ehAdmin(): Promise<boolean> {
+  return (await adminAtual()) !== null;
+}
+
 export interface AcessoEmpresa {
   nivel: NivelAcesso;
   aviso: string | null;
