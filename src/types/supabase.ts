@@ -388,6 +388,7 @@ export type Database = {
           enviado: boolean
           id: string
           texto: string
+          tipo: string
           veiculo_id: string | null
         }
         Insert: {
@@ -397,6 +398,7 @@ export type Database = {
           enviado?: boolean
           id?: string
           texto: string
+          tipo?: string
           veiculo_id?: string | null
         }
         Update: {
@@ -406,6 +408,7 @@ export type Database = {
           enviado?: boolean
           id?: string
           texto?: string
+          tipo?: string
           veiculo_id?: string | null
         }
         Relationships: [

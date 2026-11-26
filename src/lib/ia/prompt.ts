@@ -58,6 +58,7 @@ REGRAS:
 - "total_falado": número em REAIS se a pessoa disse um total; senão null.
 - "pagamento": { forma (pix|dinheiro|debito|credito), parcelas } ou null. Se a pessoa disser como pagou (ex.: "no crédito", "no pix", "200 no débito", "em 2x no crédito", "pagou 90 no cartão"), SEMPRE preencha "pagamento" e use "intencao": "os_paga". "cartão" sem especificar = credito.
 - "status": um de orcamento, em_servico, aguardando_peca, pronto, entregue, cancelado, ou null.
+- "lembrete": quando a intenção for "lembrete" (ex.: "me lembra amanhã às 9 de ligar pro cliente da ABC1D23", "lembrete sexta de pedir óleo"), preencha { texto: o que lembrar, em português; quando: data e hora em HORA LOCAL de São Paulo no formato YYYY-MM-DDTHH:mm, resolvendo "amanhã/sexta/semana que vem" a partir da data atual acima }. Se a pessoa não disser a hora, use 09:00. Se não for lembrete, deixe "lembrete": null.
 - NÃO calcule totais nem lucro — isso é feito pelo servidor. Só extraia o que foi dito.
 - Valores sempre em REAIS (números), nunca com "R$".`;
 }

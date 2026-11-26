@@ -14,6 +14,7 @@ import {
   CartaoConfirmacao,
   type DadosConfirmacao,
 } from "@/components/cartao-confirmacao/cartao-confirmacao";
+import { CartaoLembrete } from "@/components/cartao-confirmacao/cartao-lembrete";
 import { Button } from "@/components/ui/button";
 import { Esqueleto } from "@/components/ui/esqueleto";
 
@@ -33,7 +34,21 @@ interface CartaoVoz {
   intent: unknown;
 }
 
-type Modo = "inicio" | "gravando" | "processando" | "cartao" | "salvo";
+interface CartaoLembreteDados {
+  texto: string;
+  quandoISO: string;
+  quandoRotulo: string;
+  placa: string | null;
+  avisos: string[];
+}
+
+type Modo =
+  | "inicio"
+  | "gravando"
+  | "processando"
+  | "cartao"
+  | "lembrete"
+  | "salvo";
 
 /**
  * Registro por voz (CLAUDE.md §6). Grava no navegador (até 60 s) ou digita →
@@ -45,9 +60,11 @@ export function TelaFalar({ dica }: { dica: string }) {
   const [modo, setModo] = useState<Modo>("inicio");
   const [erro, setErro] = useState<string | null>(null);
   const [cartao, setCartao] = useState<CartaoVoz | null>(null);
+  const [lembrete, setLembrete] = useState<CartaoLembreteDados | null>(null);
   const [digitando, setDigitando] = useState(false);
   const [texto, setTexto] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [msgSalvo, setMsgSalvo] = useState("A OS foi salva e o estoque foi atualizado.");
 
   const gravadorRef = useRef<MediaRecorder | null>(null);
   const pedacosRef = useRef<Blob[]>([]);
@@ -100,6 +117,11 @@ export function TelaFalar({ dica }: { dica: string }) {
         setModo("inicio");
         return;
       }
+      if (json.tipo === "lembrete") {
+        setLembrete(json.lembrete as CartaoLembreteDados);
+        setModo("lembrete");
+        return;
+      }
       setCartao(json.cartao as CartaoVoz);
       setModo("cartao");
     } catch {
@@ -127,6 +149,38 @@ export function TelaFalar({ dica }: { dica: string }) {
         return;
       }
       setSalvando(false);
+      setMsgSalvo("A OS foi salva e o estoque foi atualizado.");
+      setModo("salvo");
+      router.refresh();
+    } catch {
+      setErro("Falha de conexão ao salvar.");
+      setSalvando(false);
+    }
+  }
+
+  async function confirmarLembrete() {
+    if (!lembrete) return;
+    setSalvando(true);
+    setErro(null);
+    try {
+      const res = await fetch("/api/lembrete/confirmar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          texto: lembrete.texto,
+          quandoISO: lembrete.quandoISO,
+          placa: lembrete.placa,
+        }),
+      });
+      if (!res.ok) {
+        setErro("Não consegui salvar o lembrete. Tente de novo.");
+        setSalvando(false);
+        return;
+      }
+      setSalvando(false);
+      setMsgSalvo(
+        `Lembrete criado para ${lembrete.quandoRotulo}. Você será avisado.`,
+      );
       setModo("salvo");
       router.refresh();
     } catch {
@@ -137,6 +191,7 @@ export function TelaFalar({ dica }: { dica: string }) {
 
   function recomecar() {
     setCartao(null);
+    setLembrete(null);
     setTexto("");
     setErro(null);
     setDigitando(false);
@@ -189,6 +244,45 @@ export function TelaFalar({ dica }: { dica: string }) {
     );
   }
 
+  // ----- Cartão de lembrete -----
+  if (modo === "lembrete" && lembrete) {
+    return (
+      <section className="space-y-4">
+        <h1 className="font-grotesk text-titulo font-bold text-principal">
+          Confere aí
+        </h1>
+        {lembrete.avisos.length > 0 ? (
+          <ul className="space-y-1 rounded-xl bg-atencao-fundo px-3 py-2">
+            {lembrete.avisos.map((a, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-2 text-legenda text-atencao"
+              >
+                <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {a}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {erro ? (
+          <p className="rounded-xl bg-erro-fundo px-3 py-2 text-legenda text-erro">
+            {erro}
+          </p>
+        ) : null}
+        <CartaoLembrete
+          dados={{
+            texto: lembrete.texto,
+            quandoRotulo: lembrete.quandoRotulo,
+            placa: lembrete.placa,
+          }}
+          onConfirmar={confirmarLembrete}
+          onCorrigir={recomecar}
+          salvando={salvando}
+        />
+      </section>
+    );
+  }
+
   // ----- Salvo -----
   if (modo === "salvo") {
     return (
@@ -199,10 +293,8 @@ export function TelaFalar({ dica }: { dica: string }) {
         <h1 className="font-grotesk text-titulo font-bold text-principal">
           Registrado!
         </h1>
-        <p className="max-w-sm text-corpo text-texto-secundario">
-          A OS foi salva e o estoque foi atualizado.
-        </p>
-        <Button onClick={recomecar}>Registrar outra</Button>
+        <p className="max-w-sm text-corpo text-texto-secundario">{msgSalvo}</p>
+        <Button onClick={recomecar}>Registrar outro</Button>
       </section>
     );
   }

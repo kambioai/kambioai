@@ -28,6 +28,7 @@ export async function avisarFalta(
   const { error } = await sb.from("lembretes").insert({
     texto: `Falta no estoque: ${parsed.data.nome.trim()}`,
     data_hora: new Date().toISOString(),
+    tipo: "falta",
     empresa_id: emp.id,
   });
   if (error) return { ok: false, erro: "Não consegui avisar o patrão." };

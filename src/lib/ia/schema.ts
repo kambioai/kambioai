@@ -60,6 +60,16 @@ const pagamento = z
   .nullable()
   .default(null);
 
+// Lembrete falado: o que lembrar e quando. "quando" vem em hora local de
+// São Paulo no formato YYYY-MM-DDTHH:mm (o servidor converte e valida).
+const lembrete = z
+  .object({
+    texto: z.string(),
+    quando: z.string().nullable().default(null),
+  })
+  .nullable()
+  .default(null);
+
 export const respostaIaSchema = z.object({
   intencao: z.enum(intencoes),
   transcricao: z.string().default(""),
@@ -70,6 +80,7 @@ export const respostaIaSchema = z.object({
   total_falado: z.number().nonnegative().nullable().default(null),
   pagamento,
   status: z.enum(statusOs).nullable().default(null),
+  lembrete,
 });
 
 export type RespostaIa = z.infer<typeof respostaIaSchema>;
