@@ -6,6 +6,7 @@ import { criarClienteServico } from "@/lib/supabase/service";
 import {
   carregarContexto,
   intentDaResposta,
+  montarCartaoLembrete,
   processar,
 } from "@/server/voz-core";
 
@@ -68,7 +69,16 @@ export async function POST(req: Request) {
     // não bloqueia o fluxo se o log falhar
   }
 
+  // Lembrete tem fluxo próprio (CLAUDE.md §8): cartão sem dinheiro, salvo em
+  // `lembretes`. Qualquer papel pode criar um lembrete.
+  if (r.dados.intencao === "lembrete") {
+    return NextResponse.json({
+      tipo: "lembrete",
+      lembrete: montarCartaoLembrete(r.dados),
+    });
+  }
+
   const intent = intentDaResposta(r.dados);
   const { cartao } = processar(ctx, intent);
-  return NextResponse.json({ cartao });
+  return NextResponse.json({ tipo: "os", cartao });
 }

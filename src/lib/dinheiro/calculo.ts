@@ -88,3 +88,13 @@ export function calcularOS(params: {
 export function reaisParaCentavos(reais: number): number {
   return Math.round(reais * 100);
 }
+
+const fmtBRL = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
+
+/** Formata centavos como "R$ 1.234,56" (para textos de notificação/servidor). */
+export function formatarReais(centavos: number): string {
+  return fmtBRL.format(centavos / 100);
+}

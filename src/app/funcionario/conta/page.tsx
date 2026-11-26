@@ -1,6 +1,7 @@
 import { ClipboardList } from "lucide-react";
 
 import { BotaoSair } from "@/components/auth/botao-sair";
+import { AtivarPush } from "@/components/push/ativar-push";
 import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { EstadoVazio } from "@/components/estado-vazio/estado-vazio";
@@ -36,6 +37,8 @@ export default async function ContaFuncionario() {
           Funcionário · {conta.empresaNome}
         </p>
       </Cartao>
+
+      <AtivarPush />
 
       <div>
         <h2 className="mb-3 font-grotesk text-titulo font-bold text-principal">

@@ -244,6 +244,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
   - Assinar ativa a empresa; falha de pagamento leva a só leitura/bloqueio; pagar reativa. Teste de webhook passa.
 
 ## Fase 12 — Lembretes, push e tarefas agendadas
+- **Status**: ✅ Concluída (25/11/2026) — mesclada na `main` e removida. **Web Push nativo** (VAPID + `web-push`): envio no servidor com limpeza de inscrições expiradas (404/410), `enviarPushEmpresa`/`enviarPushPatrao` (dinheiro só pro dono); service worker com handlers `push`/`notificationclick`; toggle "Ativar avisos" na Conta (patrão e funcionário) via `/api/push/inscrever` sob RLS. **Lembrete por voz/texto** reusa o pipeline (schema+prompt ganharam `lembrete {texto, quando}`, hora local SP→ISO no servidor); `/api/voz` ramifica (cartão de lembrete sem dinheiro × cartão de OS); grava em `/api/lembrete/confirmar` com `garantirEscrita`; lembretes aparecem no Painel (vencidos em laranja); "avisar falta" virou `tipo: "falta"`. **3 crons** (`vercel.json`, protegidos por `CRON_SECRET`): lembretes a cada 5 min; resumo do dia + "feche o caixa" + estoque mínimo às 18h BRT (push ao patrão); retorno de cliente + régua de cobrança diário. Migração 0013 (coluna `tipo` em `lembretes`) aplicada em produção. Testes verdes (34; novos: lembrete por voz, guarda do cron). Smoke test real: rotas recusam sem auth (401) e rodam com o segredo; disparo fim a fim provado (lembrete vencido → cron `disparados` → `enviado=true` → push nativo recebido no aparelho). *(Pendência de produção p/ Fase 14: definir `CRON_SECRET`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` na Vercel; push no celular exige PWA instalado + HTTPS.)*
 - **Branch**: `fase-12-notificacoes`
 - **Objetivo**: avisos automáticos funcionando.
 - **Fonte dos dados**: `real` (web-push + Vercel Cron).
@@ -306,7 +307,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 9 ✅ | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
 | 10 ✅ | `fase-10-equipe` | Convite + permissões do funcionário | real |
 | 11 | `fase-11-stripe` | Assinatura + régua de cobrança | real |
-| 12 | `fase-12-notificacoes` | Lembretes + push + crons | real |
+| 12 ✅ | `fase-12-notificacoes` | Lembretes + push + crons | real |
 | 13 | `fase-13-admin-real` | Painel admin operando o SaaS | real |
 | 14 | `fase-14-deploy-producao` | Endurecimento + domínio + LGPD + go-live | real |
 

@@ -3,6 +3,7 @@ import {
   BotaoPortal,
 } from "@/components/assinatura/botoes-assinatura";
 import { BotaoSair } from "@/components/auth/botao-sair";
+import { AtivarPush } from "@/components/push/ativar-push";
 import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
@@ -78,6 +79,8 @@ export default async function Conta() {
           <BotaoAssinar className="mt-3">Assinar o Kambio</BotaoAssinar>
         )}
       </Cartao>
+
+      <AtivarPush />
 
       <Cartao>
         <CartaoTitulo>Empresa</CartaoTitulo>

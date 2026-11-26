@@ -10,6 +10,7 @@ import {
   type TaxaCalculo,
   type TotaisOS,
 } from "@/lib/dinheiro/calculo";
+import { formatarQuando } from "@/lib/datas";
 import { normalizarPlaca, placaValida } from "@/lib/placa";
 import { rotuloPagamento } from "@/lib/rotulos";
 import { criarClienteServidor } from "@/lib/supabase/server";
@@ -304,5 +305,52 @@ export function processar(
       avisos,
       intent,
     },
+  };
+}
+
+// ===== Lembrete por voz (CLAUDE.md §6/§8) =====
+
+export interface CartaoLembrete {
+  texto: string;
+  quandoISO: string;
+  quandoRotulo: string;
+  placa: string | null;
+  avisos: string[];
+}
+
+/** São Paulo é fixo em UTC−3 (sem horário de verão desde 2019). */
+function localSpParaISO(quando: string): Date | null {
+  // Aceita "YYYY-MM-DDTHH:mm" (ou com segundos). Trata como hora de São Paulo.
+  const m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(quando.trim());
+  if (!m) return null;
+  const d = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:00-03:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** Monta o cartão de confirmação de um lembrete (sem dinheiro, qualquer papel). */
+export function montarCartaoLembrete(r: RespostaIa): CartaoLembrete {
+  const avisos: string[] = [];
+  const texto = (r.lembrete?.texto || r.transcricao || "Lembrete").trim();
+
+  const parsed = r.lembrete?.quando ? localSpParaISO(r.lembrete.quando) : null;
+  let quandoISO: string;
+  if (parsed) {
+    quandoISO = parsed.toISOString();
+    if (parsed.getTime() < Date.now() - 60_000) {
+      avisos.push("Esse horário já passou — confira a data.");
+    }
+  } else {
+    quandoISO = new Date(Date.now() + 3_600_000).toISOString();
+    avisos.push(
+      "Não peguei o horário — deixei pra daqui a 1 hora. Corrija se precisar.",
+    );
+  }
+
+  return {
+    texto,
+    quandoISO,
+    quandoRotulo: formatarQuando(quandoISO),
+    placa: r.veiculo?.placa ? normalizarPlaca(r.veiculo.placa) : null,
+    avisos,
   };
 }

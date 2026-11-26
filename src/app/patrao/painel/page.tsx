@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Car, Package, TriangleAlert } from "lucide-react";
+import { Bell, Car, Package, TriangleAlert } from "lucide-react";
 
 import { BuscaPlaca } from "@/components/busca-placa";
 import { DespesaRapida } from "@/components/despesa-rapida";
@@ -13,6 +13,7 @@ import {
   lerContasDoMes,
   lerResumoPainel,
   listarAlertas,
+  listarLembretes,
   listarLucroPorDia,
   listarOrdens,
   listarOrdensAbertas,
@@ -40,12 +41,13 @@ export default async function Painel({
     ? (sp.periodo as Periodo)
     : "7dias";
 
-  const [resumo, lucroDia, ranking, alertas, contas, abertas, ordens] =
+  const [resumo, lucroDia, ranking, alertas, lembretes, contas, abertas, ordens] =
     await Promise.all([
       lerResumoPainel(periodo),
       listarLucroPorDia(),
       listarRanking(),
       listarAlertas(),
+      listarLembretes(),
       lerContasDoMes(),
       listarOrdensAbertas(),
       listarOrdens(),
@@ -150,6 +152,34 @@ export default async function Painel({
           </ul>
         )}
       </div>
+
+      {/* Lembretes */}
+      {lembretes.length > 0 ? (
+        <div className="space-y-2">
+          <h2 className="font-grotesk text-titulo font-bold text-principal">
+            Lembretes
+          </h2>
+          <ul className="space-y-2">
+            {lembretes.map((l) => (
+              <li
+                key={l.id}
+                className="flex items-start gap-3 rounded-xl border border-linha bg-superficie px-4 py-3"
+              >
+                <Bell
+                  className={`mt-0.5 h-5 w-5 shrink-0 ${l.vencido ? "text-destaque" : "text-texto-secundario"}`}
+                  aria-hidden="true"
+                />
+                <div className="min-w-0">
+                  <p className="text-corpo text-texto">{l.texto}</p>
+                  <p className="text-legenda text-texto-secundario">
+                    {l.quandoRotulo}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {/* Lançar despesa */}
       <DespesaRapida />

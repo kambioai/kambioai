@@ -8,6 +8,7 @@
 // Ainda fictício (trocado nas fases seguintes): catálogo modelo e custos do
 // ONBOARDING (Fase 7) e nomes de autor/funcionário (Fase 10, tabela de perfis).
 
+import { formatarQuando } from "@/lib/datas";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import {
   catalogoMock,
@@ -363,6 +364,40 @@ export async function listarAlertas(): Promise<Alerta[]> {
       tipo: "estoque" as const,
       texto: `${i.nome}: ${i.estoque} em estoque (mínimo ${i.estoque_minimo})`,
     }));
+}
+
+export interface LembreteView {
+  id: string;
+  texto: string;
+  quandoISO: string;
+  quandoRotulo: string;
+  tipo: string;
+  vencido: boolean;
+}
+
+/**
+ * Lembretes para o Painel: os pendentes (ainda não disparados) e os que já
+ * dispararam nas últimas 48h, mais recentes de prazo primeiro. Sem dinheiro —
+ * qualquer membro pode ler (RLS `lembretes_select`).
+ */
+export async function listarLembretes(): Promise<LembreteView[]> {
+  const sb = await criarClienteServidor();
+  const limite48h = new Date(Date.now() - 48 * 3_600_000).toISOString();
+  const { data } = await sb
+    .from("lembretes")
+    .select("id, texto, data_hora, tipo, enviado")
+    .or(`enviado.eq.false,data_hora.gte.${limite48h}`)
+    .order("data_hora", { ascending: true })
+    .limit(30);
+  const agora = Date.now();
+  return (data ?? []).map((l) => ({
+    id: l.id,
+    texto: l.texto,
+    quandoISO: l.data_hora,
+    quandoRotulo: formatarQuando(l.data_hora),
+    tipo: l.tipo,
+    vencido: new Date(l.data_hora).getTime() <= agora,
+  }));
 }
 
 export interface ContasDoMes {
