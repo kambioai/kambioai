@@ -1,11 +1,23 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Descobre para onde mandar o usuário depois do login, pelo papel dele na
- * empresa (lido de `membros`, sob RLS — só retorna a própria associação).
- * Patrão → Painel; funcionário → Pátio.
+ * Descobre para onde mandar o usuário depois do login.
+ * Admin do SaaS → painel admin; patrão → Painel; funcionário → Pátio.
+ * Tudo lido sob RLS (admins_self / própria associação em membros).
  */
 export async function rotaPorPapel(sb: SupabaseClient): Promise<string> {
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (user) {
+    const { data: adm } = await sb
+      .from("admins")
+      .select("usuario_id")
+      .eq("usuario_id", user.id)
+      .maybeSingle();
+    if (adm) return "/admin/visao-geral";
+  }
+
   const { data } = await sb
     .from("membros")
     .select("papel")

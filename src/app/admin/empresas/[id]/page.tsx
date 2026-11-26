@@ -1,17 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Building2,
-  CalendarClock,
-  Ban,
-  LifeBuoy,
-  Send,
-  Ticket,
-} from "lucide-react";
+import { ArrowLeft, Building2 } from "lucide-react";
 
+import { AcoesEmpresa } from "@/components/admin/acoes-empresa";
 import { SeloStatus } from "@/components/admin/selo-status";
-import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { EstadoVazio } from "@/components/estado-vazio/estado-vazio";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
@@ -93,48 +85,7 @@ export default async function FichaEmpresa({
             </p>
           </Cartao>
 
-          <div className="space-y-3">
-            <h2 className="font-grotesk text-corpo font-bold text-principal">
-              Ações
-            </h2>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Button variant="secundario" className="justify-start">
-                <CalendarClock className="h-5 w-5" aria-hidden="true" />
-                Estender teste
-              </Button>
-              <Button variant="secundario" className="justify-start">
-                <Ticket className="h-5 w-5" aria-hidden="true" />
-                Aplicar cupom
-              </Button>
-              <Button variant="secundario" className="justify-start">
-                <Send className="h-5 w-5" aria-hidden="true" />
-                Reenviar convite
-              </Button>
-              <Button variant="secundario" className="justify-start">
-                <Ban className="h-5 w-5" aria-hidden="true" />
-                {empresa.status === "bloqueada" ? "Desbloquear" : "Bloquear"}
-              </Button>
-            </div>
-
-            <Cartao className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="flex items-center gap-2 font-medium text-texto">
-                  <LifeBuoy
-                    className="h-5 w-5 text-principal"
-                    aria-hidden="true"
-                  />
-                  Modo suporte
-                </p>
-                <p className="text-legenda text-texto-secundario">
-                  Acesso somente leitura aos dados da oficina. Cada entrada é
-                  registrada com data, hora e motivo (LGPD).
-                </p>
-              </div>
-              <Button variant="principal" className="shrink-0">
-                Entrar em modo suporte
-              </Button>
-            </Cartao>
-          </div>
+          <AcoesEmpresa empresaId={empresa.id} status={empresa.status} />
         </>
       )}
     </section>

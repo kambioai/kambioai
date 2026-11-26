@@ -256,6 +256,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
   - Um lembrete criado dispara push no horário; os crons rodam e geram os avisos.
 
 ## Fase 13 — Painel admin real
+- **Status**: ✅ Concluída (25/11/2026) — mesclada na `main` e removida. **Identidade admin real**: tabela `admins` (RLS `admins_self`), helpers `ehAdmin()`/`adminAtual()`, `/admin` protegido no middleware + gating no layout (não-admin é roteado pra sua área; login de admin cai em `/admin/visao-geral`). **6 telas com dados reais** (`src/lib/dados/admin.ts` via service role, sempre atrás da checagem de admin): Visão geral (MRR só de assinaturas ativas, empresas por status, custo de IA, margem, em risco, curva de MRR por mês), Empresas (lista+ficha: funcionários ativos, custo/correção de IA do mês, "cliente desde"/"último acesso" pela última OS), Planos (assinantes reais por plano + cupons da tabela `cupons`), Uso da IA (custo+taxa de correção reais de `uso_ia`), Suporte (tabela `chamados`), Comunicados (criar+enviar push aos patrões do público-alvo). **Modo suporte (LGPD)**: exige motivo → registra em `suporte_acessos` → visão somente-leitura (sem custo/lucro) que só abre com acesso registrado nos últimos 10 min. **Ações da ficha**: bloquear/desbloquear e estender teste reais (mudam status, régua recalcula); cupom/trocar plano/reenviar convite desativados (dependem de Stripe/e-mail → Fase 14). Métricas puras testáveis (`src/lib/admin/metricas.ts`). Migração 0014 (admins, suporte_acessos, comunicados, cupons, chamados) aplicada em produção; grants explícitos à service_role. Testes verdes (40; novo: MRR/taxa de correção). Também: `suppressHydrationWarning` no `<body>` (silencia o aviso de hidratação causado por extensão de navegador). *(Deferido p/ Fase 14/futuro: aplicar cupom e trocar plano no Stripe, reenviar convite por e-mail, captura das "frases que falharam", abertura de chamados pelo app, modelos de segmento/vocabulário da IA editáveis. Promoção de conta a admin fica no script revisável `scripts/promover-admin.mjs`, rodado manualmente — conceder privilégio não é ação automática.)*
 - **Branch**: `fase-13-admin-real`
 - **Objetivo**: admin operando o SaaS com dados reais.
 - **Fonte dos dados**: `real`.
@@ -306,9 +307,9 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 8 ✅ | `fase-08-voz` | Pipeline de voz + OS transacional | real |
 | 9 ✅ | `fase-09-operacao` | OS/pátio/estoque/despesas/painel/fechamento | real |
 | 10 ✅ | `fase-10-equipe` | Convite + permissões do funcionário | real |
-| 11 | `fase-11-stripe` | Assinatura + régua de cobrança | real |
+| 11 ✅ | `fase-11-stripe` | Assinatura + régua de cobrança | real |
 | 12 ✅ | `fase-12-notificacoes` | Lembretes + push + crons | real |
-| 13 | `fase-13-admin-real` | Painel admin operando o SaaS | real |
+| 13 ✅ | `fase-13-admin-real` | Painel admin operando o SaaS | real |
 | 14 | `fase-14-deploy-producao` | Endurecimento + domínio + LGPD + go-live | real |
 
 Cada linha só fecha depois da **Portaria de Vistoria** (segurança · desempenho · busca por erros) e de um deploy de preview verde.

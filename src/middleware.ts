@@ -4,8 +4,8 @@ import { NextResponse, type NextRequest } from "next/server";
 /**
  * Middleware de sessão + proteção de rotas (CLAUDE.md §3).
  * - Renova a sessão do Supabase a cada request (cookies).
- * - Bloqueia as áreas de patrão e funcionário para quem não está logado.
- * (O painel admin ainda é fictício até a Fase 13, então não é protegido aqui.)
+ * - Bloqueia as áreas de patrão, funcionário e admin para quem não está logado
+ *   (a checagem de QUE o usuário é admin fica no layout do admin, via DB).
  */
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protegidas = ["/patrao", "/funcionario", "/comecar"];
+  const protegidas = ["/patrao", "/funcionario", "/comecar", "/admin"];
   const precisaLogin = protegidas.some((p) =>
     request.nextUrl.pathname.startsWith(p),
   );
@@ -50,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/patrao/:path*", "/funcionario/:path*", "/comecar"],
+  matcher: ["/patrao/:path*", "/funcionario/:path*", "/comecar", "/admin/:path*"],
 };

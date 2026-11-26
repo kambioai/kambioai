@@ -1,6 +1,6 @@
-import { Megaphone, Plus } from "lucide-react";
+import { Megaphone } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { FormComunicado } from "@/components/admin/form-comunicado";
 import { EstadoVazio } from "@/components/estado-vazio/estado-vazio";
 import { cn } from "@/lib/utils";
 import { listarComunicados } from "@/lib/dados/admin";
@@ -16,15 +16,11 @@ export default async function ComunicadosAdmin() {
 
   return (
     <section className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-grotesk text-titulo font-bold text-principal">
-          Comunicados
-        </h1>
-        <Button size="sm">
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          Novo comunicado
-        </Button>
-      </div>
+      <h1 className="font-grotesk text-titulo font-bold text-principal">
+        Comunicados
+      </h1>
+
+      <FormComunicado />
 
       {comunicados.length === 0 ? (
         <EstadoVazio

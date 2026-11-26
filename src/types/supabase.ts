@@ -39,6 +39,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          criado_em: string
+          nome: string | null
+          usuario_id: string
+        }
+        Insert: {
+          criado_em?: string
+          nome?: string | null
+          usuario_id: string
+        }
+        Update: {
+          criado_em?: string
+          nome?: string | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       auditoria: {
         Row: {
           antes: Json | null
@@ -133,6 +151,41 @@ export type Database = {
           },
         ]
       }
+      chamados: {
+        Row: {
+          assunto: string
+          criado_em: string
+          empresa_id: string
+          id: string
+          prioridade: string
+          status: string
+        }
+        Insert: {
+          assunto: string
+          criado_em?: string
+          empresa_id: string
+          id?: string
+          prioridade?: string
+          status?: string
+        }
+        Update: {
+          assunto?: string
+          criado_em?: string
+          empresa_id?: string
+          id?: string
+          prioridade?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chamados_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clientes: {
         Row: {
           atualizado_em: string
@@ -167,6 +220,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      comunicados: {
+        Row: {
+          alcance: number
+          corpo: string
+          criado_em: string
+          criado_por: string | null
+          enviado_em: string | null
+          id: string
+          publico: string
+          status: string
+          titulo: string
+        }
+        Insert: {
+          alcance?: number
+          corpo: string
+          criado_em?: string
+          criado_por?: string | null
+          enviado_em?: string | null
+          id?: string
+          publico?: string
+          status?: string
+          titulo: string
+        }
+        Update: {
+          alcance?: number
+          corpo?: string
+          criado_em?: string
+          criado_por?: string | null
+          enviado_em?: string | null
+          id?: string
+          publico?: string
+          status?: string
+          titulo?: string
+        }
+        Relationships: []
       }
       convites: {
         Row: {
@@ -220,6 +309,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cupons: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          criado_em: string
+          descricao: string
+          id: string
+          meses: number | null
+          percentual: number | null
+          usos: number
+          validade: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          criado_em?: string
+          descricao: string
+          id?: string
+          meses?: number | null
+          percentual?: number | null
+          usos?: number
+          validade?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          criado_em?: string
+          descricao?: string
+          id?: string
+          meses?: number | null
+          percentual?: number | null
+          usos?: number
+          validade?: string | null
+        }
+        Relationships: []
       }
       custos_fixos: {
         Row: {
@@ -704,6 +829,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "push_inscricoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suporte_acessos: {
+        Row: {
+          admin_id: string
+          criado_em: string
+          empresa_id: string
+          id: string
+          motivo: string
+        }
+        Insert: {
+          admin_id: string
+          criado_em?: string
+          empresa_id: string
+          id?: string
+          motivo: string
+        }
+        Update: {
+          admin_id?: string
+          criado_em?: string
+          empresa_id?: string
+          id?: string
+          motivo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suporte_acessos_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"

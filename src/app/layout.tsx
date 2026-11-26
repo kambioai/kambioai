@@ -41,7 +41,11 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
+      {/* suppressHydrationWarning: extensões de navegador (ex.: ColorZilla)
+          injetam atributos no <body> antes do React; isso silencia só esse
+          aviso de atributo neste elemento, sem esconder erros dos componentes. */}
       <body
+        suppressHydrationWarning
         className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}
       >
         {children}
