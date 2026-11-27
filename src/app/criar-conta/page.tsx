@@ -21,6 +21,17 @@ export default function CriarConta() {
       }
     >
       <FormularioCriarConta />
+      <p className="mt-4 text-center text-legenda text-texto-secundario">
+        Ao criar a conta, você concorda com os{" "}
+        <Link href="/termos" className="text-principal hover:underline">
+          Termos
+        </Link>{" "}
+        e a{" "}
+        <Link href="/privacidade" className="text-principal hover:underline">
+          Política de Privacidade
+        </Link>
+        .
+      </p>
     </CascaAuth>
   );
 }

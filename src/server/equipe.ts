@@ -5,6 +5,8 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 
 import { sincronizarAssinaturaFuncionarios } from "@/server/assinatura";
+import { enviarEmail, urlApp } from "@/lib/email/cliente";
+import { EmailConvite } from "@/lib/email/templates/convite";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Escrita da equipe (CLAUDE.md §3, §11): tudo no SERVIDOR, sob RLS. As policies
@@ -61,6 +63,24 @@ export async function criarConvite(
     criado_por: user?.id ?? null,
   });
   if (error) return { ok: false, erro: "Não consegui criar o convite." };
+
+  // Se veio e-mail, manda o convite (best-effort: o link copiável é o plano B).
+  if (parsed.data.email) {
+    const { data: emp } = await sb
+      .from("empresas")
+      .select("nome")
+      .eq("id", empresaId)
+      .maybeSingle();
+    await enviarEmail({
+      to: parsed.data.email,
+      subject: `${emp?.nome ?? "Sua oficina"} te convidou para o Kambio`,
+      react: EmailConvite({
+        nome: parsed.data.nome.trim(),
+        oficina: emp?.nome ?? "a oficina",
+        link: urlApp(`/convite/${token}`),
+      }),
+    });
+  }
 
   return { ok: true, token };
 }

@@ -3,12 +3,11 @@ import { User } from "lucide-react";
 
 import { Logo } from "@/components/logo";
 import { configPerfis, type PerfilApp } from "./perfis";
-import { SeletorPerfil } from "./seletor-perfil";
 
 /**
  * Barra do topo do app. No celular mostra o logo (a lateral fica escondida);
- * no computador o logo vive na barra lateral. À direita: o seletor de perfil
- * (desenvolvimento) e o ícone de conta (fora da barra, CLAUDE.md §10).
+ * no computador o logo vive na barra lateral. À direita: o ícone de conta
+ * (fora da barra, CLAUDE.md §10).
  */
 export function TopoApp({ perfil }: { perfil: PerfilApp }) {
   const cfg = configPerfis[perfil];
@@ -25,7 +24,6 @@ export function TopoApp({ perfil }: { perfil: PerfilApp }) {
       <div className="hidden md:block" />
 
       <div className="flex items-center gap-2">
-        <SeletorPerfil atual={perfil} />
         {cfg.conta ? (
           <Link
             href={cfg.conta.href}

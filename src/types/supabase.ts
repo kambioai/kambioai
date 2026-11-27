@@ -1199,6 +1199,7 @@ export type Database = {
       empresas_do_usuario: { Args: never; Returns: string[] }
       entrar_como_funcionario_demo: { Args: never; Returns: undefined }
       entrar_como_patrao_demo: { Args: never; Returns: undefined }
+      excluir_empresa: { Args: { p_empresa_id: string }; Returns: undefined }
       registrar_os: {
         Args: {
           p_cliente_id: string
