@@ -3,8 +3,8 @@ import {
   BotaoPortal,
 } from "@/components/assinatura/botoes-assinatura";
 import { BotaoSair } from "@/components/auth/botao-sair";
+import { DadosLgpd } from "@/components/conta/dados-lgpd";
 import { AtivarPush } from "@/components/push/ativar-push";
-import { Button } from "@/components/ui/button";
 import { Cartao, CartaoTitulo } from "@/components/ui/cartao";
 import { ValorReais } from "@/components/valor-reais/valor-reais";
 import { lerAssinatura, lerDadosConta } from "@/lib/dados";
@@ -108,12 +108,9 @@ export default async function Conta() {
         </ul>
       </Cartao>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button variant="secundario" className="flex-1">
-          Exportar dados
-        </Button>
-        <BotaoSair className="flex-1" />
-      </div>
+      <DadosLgpd />
+
+      <BotaoSair className="w-full" />
     </section>
   );
 }

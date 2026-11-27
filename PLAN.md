@@ -276,6 +276,7 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 # BLOCO 3 — Lançamento
 
 ## Fase 14 — Endurecimento e deploy produtivo
+- **Status**: ✅ Concluída (27/11/2026) — mesclada na `main`. Fecha o Bloco 3 (Marco 2 — MVP produtivo). **E-mails via Resend + React Email** (boas-vindas no onboarding, convite de funcionário, aviso de cobrança na régua), com templates na identidade; tudo **best-effort e gated por `RESEND_API_KEY`** (sem chave, não envia e não quebra). `src/lib/email/cliente.ts` (`server-only`, `urlApp()` a partir de `NEXT_PUBLIC_APP_URL`); `membros` passa a guardar o e-mail do patrão no onboarding. **LGPD**: páginas públicas `/termos` e `/privacidade` (deixando claro que o áudio passa pelo Google/Gemini e é apagado após o processamento), seção na Conta do patrão para **exportar** (`/api/exportar`, só patrão, JSON) e **excluir a própria oficina** (`excluirMinhaOficina` → migração 0015 `excluir_empresa` SECURITY DEFINER, apaga na ordem certa pra não estourar o trigger de auditoria + cancela a assinatura no Stripe best-effort + encerra a sessão); consentimento no cadastro linkando termos/privacidade. **PWA**: `metadataBase`, ícones (192/apple-touch), `suppressHydrationWarning` no `<body>`. **Limpeza das telas de desenvolvimento**: removido o seletor de perfil do topo, a vitrine `/componentes` e o `seletor-perfil`; a raiz (`/`) virou redirect (logado → sua área, deslogado → `/entrar`). **Vistoria geral verde**: typecheck, lint, build e 42 testes. *(Ação do usuário em produção, fora do código: variáveis na Vercel — incl. `NEXT_PUBLIC_APP_URL=https://kambioai.com.br`; verificar o domínio no Resend; Stripe modo live só quando tudo estiver testado; Supabase Pro quando começar a vender. Domínio final em uso: **kambioai.com.br**.)*
 - **Branch**: `fase-14-deploy-producao`
 - **Objetivo**: ambiente de produção pronto para a primeira oficina pagante.
 - **Fonte dos dados**: `real` (produção).
@@ -310,6 +311,6 @@ A partir daqui cada fase **substitui os dados fictícios pelos reais** dentro de
 | 11 ✅ | `fase-11-stripe` | Assinatura + régua de cobrança | real |
 | 12 ✅ | `fase-12-notificacoes` | Lembretes + push + crons | real |
 | 13 ✅ | `fase-13-admin-real` | Painel admin operando o SaaS | real |
-| 14 | `fase-14-deploy-producao` | Endurecimento + domínio + LGPD + go-live | real |
+| 14 ✅ | `fase-14-deploy-producao` | Endurecimento + domínio + LGPD + go-live | real |
 
 Cada linha só fecha depois da **Portaria de Vistoria** (segurança · desempenho · busca por erros) e de um deploy de preview verde.

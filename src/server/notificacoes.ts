@@ -1,6 +1,8 @@
 import "server-only";
 
 import { formatarReais } from "@/lib/dinheiro/calculo";
+import { enviarEmail, urlApp } from "@/lib/email/cliente";
+import { EmailCobranca } from "@/lib/email/templates/cobranca";
 import {
   enviarPushEmpresa,
   enviarPushPatrao,
@@ -172,6 +174,30 @@ export async function processarDiario(
         url: "/patrao/conta",
         tag: "cobranca",
       });
+      // Reforça por e-mail aos patrões com e-mail cadastrado (best-effort).
+      const { data: patroes } = await svc
+        .from("membros")
+        .select("email")
+        .eq("empresa_id", emp.id)
+        .eq("papel", "patrao")
+        .eq("ativo", true);
+      const { data: dadosEmp } = await svc
+        .from("empresas")
+        .select("nome")
+        .eq("id", emp.id)
+        .maybeSingle();
+      for (const p of patroes ?? []) {
+        if (!p.email) continue;
+        await enviarEmail({
+          to: p.email,
+          subject: "Aviso sobre sua assinatura do Kambio",
+          react: EmailCobranca({
+            oficina: dadosEmp?.nome ?? "sua oficina",
+            aviso,
+            link: urlApp("/patrao/conta"),
+          }),
+        });
+      }
     }
 
     // --- Retorno de cliente ---

@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 
+import { enviarEmail, urlApp } from "@/lib/email/cliente";
+import { EmailBoasVindas } from "@/lib/email/templates/boas-vindas";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Escrita sensível do onboarding (CLAUDE.md §3): roda no SERVIDOR, com a sessão
@@ -69,6 +71,29 @@ export async function criarEmpresa(
   if (error || !data) {
     return { ok: false, erro: "Não consegui criar a oficina. Tente de novo." };
   }
+
+  // Guarda o e-mail do patrão no vínculo (usado nos avisos de cobrança por
+  // e-mail). Best-effort: não impede a criação da oficina se falhar.
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (user?.email) {
+    await sb
+      .from("membros")
+      .update({ email: user.email })
+      .eq("usuario_id", user.id)
+      .eq("empresa_id", data);
+    await enviarEmail({
+      to: user.email,
+      subject: "Bem-vindo ao Kambio",
+      react: EmailBoasVindas({
+        nome:
+          (user.user_metadata?.nome as string | undefined) ?? parsed.data.nome,
+        link: urlApp("/comecar"),
+      }),
+    });
+  }
+
   return { ok: true, empresaId: data };
 }
 
